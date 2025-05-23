@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shinigami Realm</title>
+  <head>
+  <meta charset="UTF-8">
+  <title>Shinigami Realm</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+</head>
+
+ <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(to bottom, #0a0a0a 0%, #0a0a0a 100%);
+      color: #e0f7ff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .intro-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 2000;
+      transition: opacity 1s ease;
+      color: #00ccff;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    .intro-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .welcome-text {
+      font-size: 1.8rem;
+      margin-bottom: 2rem;
+      font-weight: 600;
+      user-select: none;
+    }
+
+    .intro-button {
+      background-color: #00ccff;
+      color: #000;
+      border: none;
+      padding: 1rem 2rem;
+      font-size: 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      box-shadow: 0 0 20px rgba(0, 204, 255, 0.5);
+    }
+
+    .intro-button:hover {
+      background-color: #00b4e6;
+      transform: scale(1.05);
+    }
+
+    nav {
+      background-color: #101820;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.5rem;
+      box-shadow: 0 4px 10px rgba(0, 204, 255, 0.3);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      user-select: none;
+      flex-wrap: wrap;
+    }
+
+    nav .title {
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: #00ccff;
+      user-select: text;
+    }
+
+    /* --- Enhanced Hamburger Styles --- */
+    nav .hamburger {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 30px;
+      height: 24px;
+      cursor: pointer;
+      position: relative;
+      z-index: 1500;
+      filter: drop-shadow(0 2px 2px rgba(0, 204, 255, 0.6));
+      transition: filter 0.3s ease;
+    }
+
+    nav .hamburger:hover {
+      filter: drop-shadow(0 4px 4px rgba(0, 204, 255, 0.8));
+    }
+
+    nav .hamburger span {
+      display: block;
+      height: 4px;
+      background-color: #00ccff;
+      border-radius: 3px;
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s, opacity 0.3s;
+      box-shadow:
+        0 0 6px #00ccff,
+        0 0 12px #00ccff,
+        0 0 18px #00ccff;
+      will-change: transform;
+    }
+
+    nav .hamburger span:not(:last-child) {
+      margin-bottom: 6px;
+    }
+
+    /* Hamburger active toggle (turns into an X) */
+    nav .hamburger.active span:nth-child(1) {
+      transform: translateY(10px) rotate(45deg);
+      background-color: #00b4e6;
+      box-shadow:
+        0 0 10px #00b4e6,
+        0 0 20px #00b4e6;
+    }
+
+    nav .hamburger.active span:nth-child(2) {
+      opacity: 0;
+      transform: scaleX(0);
+    }
+
+    nav .hamburger.active span:nth-child(3) {
+      transform: translateY(-10px) rotate(-45deg);
+      background-color: #00b4e6;
+      box-shadow:
+        0 0 10px #00b4e6,
+        0 0 20px #00b4e6;
+    }
+
+    nav .nav-links {
+      width: 100%;
+      margin-top: 0.5rem;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      border-top: 1px solid #00ccff;
+      padding-top: 0.5rem;
+      transition: max-height 0.5s ease, opacity 0.4s ease;
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+    }
+
+    nav .nav-links.show {
+      display: flex;
+      max-height: 500px; /* enough to show all links */
+      opacity: 1;
+    }
+
+    nav .nav-links a {
+      color: #00ccff;
+      margin: 0.5rem 0;
+      text-decoration: none;
+      font-size: 1.1rem;
+      transition: color 0.3s, transform 0.3s;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    nav .nav-links a:hover {
+      color: #00b4e6;
+      transform: scale(1.05);
+    }
+
+    nav .nav-links a.active {
+      color: #e0f7ff;
+      font-weight: bold;
+      border-bottom: 2px solid #00ccff;
+      padding-bottom: 4px;
+    }
+
+    main {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      flex-grow: 1;
+    }
+
+    section {
+      display: none;
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    h1 {
+      color: #00ccff;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .bulletin-content,
+    .changelog-content,
+    .aboutus-content,
+    .tradecalc-content,
+    .bloxfruitnews-content {
+      background-color: #1a1a1a;
+      padding: 1.5rem 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0, 204, 255, 0.15);
+      line-height: 1.5;
+      font-size: 1.1rem;
+    }
+
+    .coming-soon {
+      color: #00ccff;
+      font-style: italic;
+      font-weight: 600;
+      font-size: 1.3rem;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    footer {
+      background-color: #101820;
+      color: #00ccff;
+      text-align: center;
+      padding: 1rem 0;
+      font-size: 0.9rem;
+      margin-top: auto;
+    }
+
+    a.discord-link {
+      color: #00ccff;
+      font-weight: bold;
+      text-decoration: none;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    a.discord-link:hover {
+      text-decoration: underline;
+    }
+
+    /* === NEW TRADE CALCULATOR STYLES === */
+    .tradecalc-content {
+      background-color: #1a1a1a;
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0, 204, 255, 0.15);
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .search-container {
+      position: sticky;
+      top: 0;
+      background-color: #1a1a1a;
+      padding-bottom: 1rem;
+      z-index: 10;
+    }
+
+    #fruitSearch {
+      width: 100%;
+      padding: 0.75rem;
+      background-color: #0a0a0a;
+      border: 1px solid #00ccff;
+      color: #e0f7ff;
+      border-radius: 4px;
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .fruit-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+    }
+
+    .fruit-table th {
+      position: sticky;
+      top: 60px;
+      background-color: #101820;
+      z-index: 5;
+    }
+
+    .fruit-table th, 
+    .fruit-table td {
+      border: 1px solid #00ccff;
+      padding: 0.75rem;
+      text-align: left;
+    }
+
+    .fruit-table tr:hover {
+      background-color: #252525;
+    }
+
+    .fruit-table input[type="number"] {
+      width: 70px;
+      padding: 0.5rem;
+      background-color: #0a0a0a;
+      border: 1px solid #00ccff;
+      color: #e0f7ff;
+      border-radius: 4px;
+      text-align: center;
+    }
+
+    .rarity-mythical { color: #ff00ff; }
+    .rarity-legendary { color: #ffaa00; }
+    .rarity-rare { color: #5555ff; }
+
+    .total-display {
+      position: sticky;
+      bottom: 0;
+      background-color: #101820;
+      padding: 1rem;
+      margin-top: 1rem;
+      border-top: 2px solid #00ccff;
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+    }
+
+    #totalBeli { color: #00ccff; }
+    #totalValue { color: #00ff88; }
+
+    /* Staff section styles */
+    .staff-section {
+      margin-top: 2rem;
+    }
+    .staff-section h2 {
+      color: #00ccff;
+      border-bottom: 1px solid #00ccff;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .staff-list {
+      margin-top: 1rem;
+    }
+    .staff-list p {
+      margin-bottom: 0.5rem;
+    }
+    .staff-list strong {
+      color: #00ccff;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="intro-overlay" id="intro">
+    <div class="welcome-text">Welcome to The Official Website of Shinigami Realm</div>
+    <button class="intro-button" onclick="enterSite()">Hop In</button>
+  </div>
+
+  <nav>
+    <div class="title">Shinigami Realm</div>
+    <div class="hamburger" id="hamburger" aria-label="Toggle navigation menu" role="button" tabindex="0">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <div class="nav-links" id="navLinks">
+      <a href="#" id="bulletinTab" class="active">Bulletin</a>
+      <a href="#" id="changelogTab">Changelog</a>
+      <a href="#" id="aboutusTab">About Us</a>
+      <a href="#" id="tradecalcTab">Trade Calculator</a>
+      <a href="#" id="bloxfruitNewsTab">Blox Fruit News</a>
+      <a href="#" id="topPVPFighterTab">Top PVP Fighter</a>
+    </div>
+  </nav>
+
+  <main>
+    <section id="bulletinSection" class="active">
+      <h1>The Shinigami's Rise</h1>
+      <div class="bulletin-content">
+        <p>Welcome to Shinigami Realm's official website! We're excited to announce that we now have our own digital home to share clan news, updates, and community content. Stay tuned for exciting features and events as we grow our realm together! We have our own private server, For Blox Fruits. We have our own private server for Grow A Graden for the members to mingle! We have private servers accross roblox!</p>
+      </div>
+      <div class="coming-soon">More will be Coming soon...</div>
+    </section>
+
+    <section id="changelogSection">
+      <h1>Changelog</h1>
+      <div class="changelog-content">
+        <div class="coming-soon">Coming next changelog...</div>
+      </div>
+    </section>
+
+    <section id="aboutusSection">
+      <h1>About Us</h1>
+      <div class="aboutus-content">
+        <p>We are a Roblox clan focused on Blox Fruits and Grow a Garden games. Our community thrives on teamwork, creativity, and shared passion for gaming. Join us on Discord and follow our updates here! We have our own private server, For Blox Fruits. We have our own private server for Grow A Graden for the members to mingle! We have private servers accross roblox!</p>
+        <a href="https://discord.gg/NgbcrWSVm5" target="_blank" rel="noopener noreferrer" class="discord-link">Join our Discord Server</a>
+        
+        <div class="staff-section">
+          <h2>The Glorious Staff</h2>
+          <div class="staff-list">
+            <p><strong>Founder:</strong> mud</p>
+            <p><strong>Co-Founders:</strong> aq.17d , Batman</p>
+            <p><strong>Senior Staff:</strong> crash , GREED , rip_gojo</p>
+            <p><strong>Moderators:</strong> Will be recruited soon....</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tradecalcSection">
+      <h1>Blox Fruits Trade Calculator</h1>
+      <div class="tradecalc-content">
+        <div class="search-container">
+          <input type="text" id="fruitSearch" placeholder="Search fruits..." class="search-bar">
+        </div>
+        <table class="fruit-table">
+          <thead>
+            <tr>
+              <th>Fruit</th>
+              <th>Rarity</th>
+              <th>Trade Value</th>
+              <th>Quantity</th>
+            </tr>
+          </thead>
+          <tbody id="fruitTable">
+            <!-- Mythical/Legendary Fruits -->
+            <tr><td>Dragon West</td><td class="rarity-mythical">Mythical</td><td>1.2B</td><td><input type="number" min="0" value="0" data-value="1200"></td></tr>
+            <tr><td>Dragon East</td><td class="rarity-mythical">Mythical</td><td>960M</td><td><input type="number" min="0" value="0" data-value="960"></td></tr>
+            <tr><td>Kitsune</td><td class="rarity-mythical">Mythical</td><td>240M</td><td><input type="number" min="0" value="0" data-value="240"></td></tr>
+            <tr><td>Yeti</td><td class="rarity-mythical">Mythical</td><td>140M</td><td><input type="number" min="0" value="0" data-value="140"></td></tr>
+            <tr><td>Gas</td><td class="rarity-legendary">Legendary</td><td>75M</td><td><input type="number" min="0" value="0" data-value="75"></td></tr>
+            <tr><td>Leo</td><td class="rarity-legendary">Legendary</td><td>60M</td><td><input type="number" min="0" value="0" data-value="60"></td></tr>
+            <tr><td>Gravity</td><td class="rarity-legendary">Legendary</td><td>45M</td><td><input type="number" min="0" value="0" data-value="45"></td></tr>
+            <tr><td>T-Rex</td><td class="rarity-legendary">Legendary</td><td>20M</td><td><input type="number" min="0" value="0" data-value="20"></td></tr>
+            <tr><td>Control</td><td class="rarity-legendary">Legendary</td><td>12M</td><td><input type="number" min="0" value="0" data-value="12"></td></tr>
+            <tr><td>Spirit</td><td class="rarity-legendary">Legendary</td><td>10M</td><td><input type="number" min="0" value="0" data-value="10"></td></tr>
+            <tr><td>Mammoth</td><td class="rarity-legendary">Legendary</td><td>10M</td><td><input type="number" min="0" value="0" data-value="10"></td></tr>
+            <tr><td>Venom</td><td class="rarity-legendary">Legendary</td><td>10M</td><td><input type="number" min="0" value="0" data-value="10"></td></tr>
+            <tr><td>Portal</td><td class="rarity-legendary">Legendary</td><td>10M</td><td><input type="number" min="0" value="0" data-value="10"></td></tr>
+            <tr><td>Buddha</td><td class="rarity-legendary">Legendary</td><td>10M</td><td><input type="number" min="0" value="0" data-value="10"></td></tr>
+            <tr><td>Rumble</td><td class="rarity-rare">Rare</td><td>7M</td><td><input type="number" min="0" value="0" data-value="7"></td></tr>
+            <tr><td>Shadow</td><td class="rarity-rare">Rare</td><td>6M</td><td><input type="number" min="0" value="0" data-value="6"></td></tr>
+            <tr><td>Blizzard</td><td class="rarity-rare">Rare</td><td>6M</td><td><input type="number" min="0" value="0" data-value="6"></td></tr>
+            <tr><td>Sound</td><td class="rarity-rare">Rare</td><td>4.5M</td><td><input type="number" min="0" value="0" data-value="4.5"></td></tr>
+            <tr><td>Phoenix</td><td class="rarity-rare">Rare</td><td>4M</td><td><input type="number" min="0" value="0" data-value="4"></td></tr>
+            <tr><td>Creation</td><td class="rarity-rare">Rare</td><td>4M</td><td><input type="number" min="0" value="0" data-value="4"></td></tr>
+            <tr><td>Pain</td><td class="rarity-rare">Rare</td><td>4M</td><td><input type="number" min="0" value="0" data-value="4"></td></tr>
+            <tr><td>Spider</td><td>Common</td><td>1.5M</td><td><input type="number" min="0" value="0" data-value="1.5"></td></tr>
+            <tr><td>Diamond</td><td>Common</td><td>1.5M</td><td><input type="number" min="0" value="0" data-value="1.5"></td></tr>
+            <tr><td>Love</td><td>Common</td><td>1.25M</td><td><input type="number" min="0" value="0" data-value="1.25"></td></tr>
+            <tr><td>Magma</td><td>Common</td><td>1.15M</td><td><input type="number" min="0" value="0" data-value="1.15"></td></tr>
+            <tr><td>Quake</td><td>Common</td><td>1M</td><td><input type="number" min="0" value="0" data-value="1"></td></tr>
+            <tr><td>Light</td><td>Common</td><td>800K</td><td><input type="number" min="0" value="0" data-value="0.8"></td></tr>
+            <tr><td>Ghost</td><td>Common</td><td>800K</td><td><input type="number" min="0" value="0" data-value="0.8"></td></tr>
+            <tr><td>Eagle</td><td>Common</td><td>800K</td><td><input type="number" min="0" value="0" data-value="0.8"></td></tr>
+            <tr><td>Rubber</td><td>Common</td><td>700K</td><td><input type="number" min="0" value="0" data-value="0.7"></td></tr>
+            <tr><td>Ice</td><td>Common</td><td>550K</td><td><input type="number" min="0" value="0" data-value="0.55"></td></tr>
+            <tr><td>Sand</td><td>Common</td><td>420K</td><td><input type="number" min="0" value="0" data-value="0.42"></td></tr>
+            <tr><td>Dark</td><td>Common</td><td>400K</td><td><input type="number" min="0" value="0" data-value="0.4"></td></tr>
+            <tr><td>Flame</td><td>Common</td><td>250K</td><td><input type="number" min="0" value="0" data-value="0.25"></td></tr>
+            <tr><td>Spike</td><td>Common</td><td>180K</td><td><input type="number" min="0" value="0" data-value="0.18"></td></tr>
+            <tr><td>Smoke</td><td>Common</td><td>100K</td><td><input type="number" min="0" value="0" data-value="0.1"></td></tr>
+            <tr><td>Bomb</td><td>Common</td><td>80K</td><td><input type="number" min="0" value="0" data-value="0.08"></td></tr>
+            <tr><td>Spring</td><td>Common</td><td>60K</td><td><input type="number" min="0" value="0" data-value="0.06"></td></tr>
+            <tr><td>Blade</td><td>Common</td><td>50K</td><td><input type="number" min="0" value="0" data-value="0.05"></td></tr>
+            <tr><td>Spin</td><td>Common</td><td>7.5K</td><td><input type="number" min="0" value="0" data-value="0.0075"></td></tr>
+            <tr><td>Rocket</td><td>Common</td><td>5K</td><td><input type="number" min="0" value="0" data-value="0.005"></td></tr>
+          </tbody>
+        </table>
+        <div class="total-display">
+          <div id="totalBeli">Total Beli Value: 0</div>
+          <div id="totalValue">Total Trade Value: 0</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="bloxfruitNewsSection">
+      <h1>Blox Fruit News</h1>
+      <div class="bloxfruitnews-content">
+        <div class="coming-soon">Waiting for next leaks...</div>
+      </div>
+    </section>
+
+    <section id="topPVPFighterSection">
+      <h1>Top PVP Fighter</h1>
+      <div class="coming-soon">Coming after the PvP Tournament...</div>
+    </section>
+  </main>
+
+  <footer>© 2025 Shinigami Realm</footer>
+
+  <script>
+    const introOverlay = document.getElementById('intro');
+    const navLinks = document.getElementById('navLinks');
+    const hamburger = document.getElementById('hamburger');
+
+    // Tab buttons
+    const tabs = {
+      bulletinTab: document.getElementById('bulletinTab'),
+      changelogTab: document.getElementById('changelogTab'),
+      aboutusTab: document.getElementById('aboutusTab'),
+      tradecalcTab: document.getElementById('tradecalcTab'),
+      bloxfruitNewsTab: document.getElementById('bloxfruitNewsTab'),
+      topPVPFighterTab: document.getElementById('topPVPFighterTab')
+    };
+
+    // Sections
+    const sections = {
+      bulletinSection: document.getElementById('bulletinSection'),
+      changelogSection: document.getElementById('changelogSection'),
+      aboutusSection: document.getElementById('aboutusSection'),
+      tradecalcSection: document.getElementById('tradecalcSection'),
+      bloxfruitNewsSection: document.getElementById('bloxfruitNewsSection'),
+      topPVPFighterSection: document.getElementById('topPVPFighterSection')
+    };
+
+    // Show site after intro
+    function enterSite() {
+      introOverlay.classList.add('hidden');
+      setTimeout(() => introOverlay.style.display = 'none', 1000);
+    }
+
+    // Hamburger toggle
+    function toggleMenu() {
+      hamburger.classList.toggle('active');
+      if (navLinks.classList.contains('show')) {
+        navLinks.classList.remove('show');
+      } else {
+        navLinks.classList.add('show');
+      }
+    }
+
+    hamburger.addEventListener('click', toggleMenu);
+    hamburger.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleMenu();
+      }
+    });
+
+    // Tab click handler
+    Object.entries(tabs).forEach(([key, tab]) => {
+      tab.addEventListener('click', e => {
+        e.preventDefault();
+        // Remove active class from all tabs
+        Object.values(tabs).forEach(t => t.classList.remove('active'));
+        // Hide all sections
+        Object.values(sections).forEach(s => s.classList.remove('active'));
+
+        // Set clicked tab active and show section
+        tab.classList.add('active');
+
+        // Map tab ID to section ID
+        let sectionId = key.replace('Tab', 'Section');
+        sections[sectionId].classList.add('active');
+
+        // Close nav menu on small screens after selection
+        if (navLinks.classList.contains('show')) {
+          toggleMenu();
+        }
+      });
+    });
+
+    // ===== ENHANCED TRADE CALCULATOR LOGIC =====
+    document.addEventListener('DOMContentLoaded', function() {
+      // Search functionality
+      const fruitSearch = document.getElementById('fruitSearch');
+      if (fruitSearch) {
+        fruitSearch.addEventListener('input', function() {
+          const searchTerm = this.value.toLowerCase();
+          const rows = document.querySelectorAll('#fruitTable tr');
+          
+          rows.forEach(row => {
+            const fruitName = row.cells[0].textContent.toLowerCase();
+            row.style.display = fruitName.includes(searchTerm) ? '' : 'none';
+          });
+        });
+      }
+
+      // Calculate totals
+      function calculateTotals() {
+        let totalBeli = 0;
+        let totalValue = 0;
+        
+        document.querySelectorAll('#fruitTable input').forEach(input => {
+          const quantity = parseInt(input.value) || 0;
+          const value = parseFloat(input.dataset.value) || 0;
+          totalValue += value * quantity;
+          
+          // Convert value back to millions for Beli calculation
+          // Note: Adjust this conversion based on your actual Beli values
+          totalBeli += value * 1000000 * quantity; // Assuming 1 value point = 1M Beli
+        });
+
+        // Format totals
+        if (document.getElementById('totalValue')) {
+          document.getElementById('totalValue').textContent = formatValue(totalValue);
+        }
+        if (document.getElementById('totalBeli')) {
+          document.getElementById('totalBeli').textContent = formatBeli(totalBeli);
+        }
+      }
+
+      // Format trade value display
+      function formatValue(value) {
+        if (value >= 1000) return `Total Trade Value: ${(value/1000).toFixed(1)}B`;
+        if (value >= 1) return `Total Trade Value: ${value.toFixed(1)}M`;
+        return `Total Trade Value: ${(value*1000).toFixed(0)}K`;
+      }
+
+      // Format Beli display
+      function formatBeli(beli) {
+        if (beli >= 1000000000) return `Total Beli Value: ${(beli/1000000000).toFixed(1)}B`;
+        if (beli >= 1000000) return `Total Beli Value: ${(beli/1000000).toFixed(1)}M`;
+        if (beli >= 1000) return `Total Beli Value: ${(beli/1000).toFixed(1)}K`;
+        return `Total Beli Value: ${beli}`;
+      }
+
+      // Add event listeners to all quantity inputs
+      document.querySelectorAll('#fruitTable input').forEach(input => {
+        input.addEventListener('input', calculateTotals);
+      });
+
+      // Initial calculation
+      calculateTotals();
+    });
+
+    // Original trade calculator logic (as fallback)
+    const inputs = document.querySelectorAll('input[type=number]');
+    const totalValueEl = document.getElementById('totalValue');
+
+    function calculateTotal() {
+      let total = 0;
+      inputs.forEach(input => {
+        const val = parseFloat(input.dataset.value) || 0;
+        const qty = parseInt(input.value) || 0;
+        total += val * qty;
+      });
+      if (totalValueEl) {
+        totalValueEl.textContent = `Total Value: ${total.toFixed(2)} B`;
+      }
+    }
+
+    inputs.forEach(input => input.addEventListener('input', calculateTotal));
+    calculateTotal();
+  </script>
+</body>
+</html>
+
