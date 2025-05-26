@@ -1,0 +1,4478 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shinigami Realm</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* --- CSS Variables for Theming --- */
+    :root {
+      --primary: #00ccff;
+      /* Bright Cyan */
+      --primary-dark: #0099cc;
+      /* Darker Cyan */
+      --secondary: #00ff88;
+      /* Vibrant Green */
+      --secondary-dark: #00e676;
+      /* Darker Vibrant Green */
+      --background: #0a0a0a;
+      /* Deep Dark Background */
+      --card-bg: #1a1a1a;
+      /* Slightly Lighter Dark for Cards */
+      --text: #e0f7ff;
+      /* Light Blue-White for Primary Text */
+      --text-secondary: #b0b0b0;
+      /* Grey for Secondary Text */
+      --border: rgba(0, 204, 255, 0.3);
+      /* Semi-transparent Primary Border */
+      --mythical: #ff00ff;
+      /* Magenta for Mythical Rarity */
+      --legendary: #ffaa00;
+      /* Orange for Legendary Rarity */
+      --rare: #5555ff;
+      /* Blue for Rare Rarity */
+      --uncommon: #55ff55;
+      /* Green for Uncommon Rarity */
+      --common: #e0f7ff;
+      /* Light Blue-White for Common Rarity */
+      --error: #ff4d4d;
+      /* Red for Error Messages */
+      --claim-ready: #00ff88;
+      /* Bright Green for Claim Button */
+      --claim-ready-shadow: rgba(0, 255, 136, 0.5);
+      /* Green Shadow for Claim Button */
+      --warning: #ffcc00;
+      /* Yellow for Warning Messages */
+      --accept-color: #28a745;
+      /* Dark Green for Accept Button */
+      --decline-color: #dc3545;
+      /* Dark Red for Decline Button */
+      --success-msg-bg: rgba(0, 255, 136, 0.2);
+      /* Light Green for Success Message Background */
+      --error-msg-bg: rgba(255, 77, 77, 0.2);
+      /* Light Red for Error Message Background */
+      --info-msg-bg: rgba(0, 204, 255, 0.2);
+      /* Light Cyan for Info Message Background */
+    }
+
+    /* --- Global Styles --- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(to bottom, var(--background) 0%, #050505 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow-x: hidden;
+      line-height: 1.6;
+      /* Add padding-bottom to prevent fixed bar from overlapping footer */
+      padding-bottom: 70px;
+      /* Adjust this value if the total-display height changes significantly */
+    }
+
+    /* --- Canvas Background --- */
+    #backgroundCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0.2;
+      /* Subtler background */
+      background-color: #000;
+      /* Fallback */
+    }
+
+    /* --- Header & Navigation --- */
+    header {
+      background-color: var(--card-bg);
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-start;
+      /* Align items to the start */
+      align-items: center;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 100;
+      /* Increased z-index for header to be above content */
+      box-shadow: 0 4px 20px rgba(0, 204, 255, 0.4);
+      /* Stronger shadow */
+    }
+
+    .logo {
+      font-size: 2rem;
+      font-weight: bold;
+      color: var(--primary);
+      text-shadow: 0 0 8px var(--primary), 0 0 15px rgba(0, 204, 255, 0.6);
+      text-decoration: none;
+      transition: text-shadow 0.3s ease;
+      cursor: pointer;
+      /* Added for redirect */
+    }
+
+    .logo:hover {
+      text-shadow: 0 0 10px var(--primary), 0 0 20px rgba(0, 204, 255, 0.8);
+    }
+
+    /* Realm Coin Display in Header (Left Side) */
+    .realm-coin-display {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: rgba(0, 255, 136, 0.1);
+      border: 1px solid var(--secondary);
+      border-radius: 20px;
+      padding: 0.4rem 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+      margin-left: 1.5rem;
+      /* Space from logo */
+    }
+
+    .realm-coin-display:hover {
+      background-color: rgba(0, 255, 136, 0.2);
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+    }
+
+    .realm-coin-icon {
+      font-size: 1.2em;
+      /* Adjusted for better diamond look */
+      color: #e0f7ff;
+      /* A subtle diamond color */
+      text-shadow: 0 0 5px rgba(0, 204, 255, 0.5);
+    }
+
+    .realm-coin-amount {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: var(--secondary);
+    }
+
+    /* Spacer to push hamburger to the right */
+    .header-spacer {
+      flex-grow: 1;
+    }
+
+    /* Bell Notification Icon */
+    .notification-bell-container {
+      position: relative;
+      margin-right: 1.5rem;
+      /* Space between bell and nav toggle */
+      z-index: 101;
+    }
+
+    .notification-bell {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-size: 1.8rem;
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 50%;
+      /* Removed box-shadow from here to fix glitch */
+      transition: color 0.3s ease, transform 0.3s ease;
+      /* Simplified transition */
+      position: relative;
+    }
+
+    .notification-bell:hover {
+      color: var(--primary-dark);
+      transform: scale(1.1);
+      box-shadow: 0 0 15px rgba(0, 204, 255, 0.5);
+      /* Apply box-shadow only on hover */
+    }
+
+    .notification-bell.has-unread {
+      animation: bell-glow 1.5s infinite alternate, bell-shake 0.8s infinite cubic-bezier(.36, .07, .19, .97) both;
+      transform-origin: top center;
+    }
+
+    @keyframes bell-glow {
+      0% {
+        text-shadow: 0 0 5px var(--primary), 0 0 10px rgba(0, 204, 255, 0.4);
+      }
+
+      100% {
+        text-shadow: 0 0 10px var(--primary), 0 0 20px rgba(0, 204, 255, 0.8);
+      }
+    }
+
+    @keyframes bell-shake {
+      10%,
+      90% {
+        transform: rotate(-8deg);
+      }
+
+      20%,
+      80% {
+        transform: rotate(8deg);
+      }
+
+      30%,
+      50%,
+      70% {
+        transform: rotate(-8deg);
+      }
+
+      40%,
+      60% {
+        transform: rotate(8deg);
+      }
+    }
+
+    .notification-count {
+      position: absolute;
+      top: 0px;
+      right: 0px;
+      background-color: var(--error);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: bold;
+      border-radius: 50%;
+      padding: 0.2em 0.5em;
+      min-width: 20px;
+      text-align: center;
+      box-shadow: 0 0 8px var(--error);
+      animation: pulse-red 1.5s infinite alternate;
+      display: none;
+      /* Hidden by default */
+    }
+
+    .notification-count.active {
+      display: block;
+    }
+
+    /* --- Notification Dropdown UI Fixes --- */
+    .notifications-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      /* Adjusted for better visibility */
+      width: 90vw;
+      /* Make it wider on small screens */
+      max-width: 450px;
+      /* Increased max-width for better readability */
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 204, 255, 0.3);
+      padding: 1.5rem;
+      /* Increased padding */
+      z-index: 999;
+      max-height: 400px;
+      overflow-y: auto;
+      animation: slideDown 0.3s ease-out forwards;
+      transform-origin: top right;
+      /* For better animation origin */
+    }
+
+    .notifications-dropdown.active {
+      display: block;
+    }
+
+    .notifications-dropdown h3 {
+      color: var(--primary);
+      margin-bottom: 1rem;
+      font-size: 1.6rem;
+      /* Larger heading */
+      border-bottom: 1px solid rgba(0, 204, 255, 0.2);
+      padding-bottom: 0.5rem;
+    }
+
+    .notification-item {
+      padding: 1rem 0.8rem;
+      /* Increased padding */
+      border-bottom: 1px solid rgba(0, 204, 255, 0.15);
+      /* Slightly stronger border */
+      color: var(--text);
+      font-size: 1rem;
+      /* Slightly larger font */
+      position: relative;
+      transition: background-color 0.2s ease;
+      cursor: pointer;
+      display: flex;
+      /* Use flex for better layout */
+      flex-direction: column;
+      /* Stack message and timestamp */
+      align-items: flex-start;
+    }
+
+    .notification-item:last-child {
+      border-bottom: none;
+    }
+
+    .notification-item:hover {
+      background-color: rgba(0, 204, 255, 0.08);
+      /* Stronger hover effect */
+    }
+
+    .notification-item.unread {
+      background-color: rgba(0, 204, 255, 0.15);
+      /* Stronger unread background */
+      font-weight: bold;
+    }
+
+    .notification-item .timestamp {
+      font-size: 0.85em;
+      /* Slightly larger timestamp */
+      color: var(--text-secondary);
+      display: block;
+      margin-top: 0.4em;
+      /* More space below message */
+      font-weight: normal;
+      /* Ensure timestamp is not bold */
+    }
+
+    .notification-item .mark-read-button {
+      position: absolute;
+      top: 0.8rem;
+      /* Adjusted position */
+      right: 0.8rem;
+      /* Adjusted position */
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.4rem;
+      /* Larger close button */
+      cursor: pointer;
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+
+    .notification-item .mark-read-button:hover {
+      color: var(--primary);
+      transform: scale(1.1);
+    }
+
+    /* Hamburger Icon */
+    .nav-toggle {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 30px;
+      height: 24px;
+      /* Adjusted height for 3 bars */
+      background: none;
+      border: none;
+      cursor: pointer;
+      z-index: 11;
+      transition: transform 0.3s ease;
+      padding: 0;
+      /* Ensure no padding affects height */
+    }
+
+    .nav-toggle span {
+      display: block;
+      height: 4px;
+      /* Height of each bar */
+      background-color: var(--primary);
+      border-radius: 3px;
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
+      box-shadow: 0 0 6px var(--primary);
+      width: 100%;
+      /* Ensure bars take full width */
+    }
+
+    .nav-toggle.active span:nth-child(1) {
+      transform: translateY(10px) rotate(45deg);
+      /* Move down and rotate */
+      box-shadow: none;
+      /* Remove glow when transformed to X */
+    }
+
+    .nav-toggle.active span:nth-child(2) {
+      opacity: 0;
+      /* Hide middle bar */
+    }
+
+    .nav-toggle.active span:nth-child(3) {
+      transform: translateY(-10px) rotate(-45deg);
+      /* Move up and rotate */
+      box-shadow: none;
+      /* Remove glow when transformed to X */
+    }
+
+    /* Navigation Content (Vertical List) */
+    nav {
+      display: none;
+      /* Hidden by default */
+      position: fixed; /* Changed to fixed for full viewport control */
+      top: 0; /* Align to top of viewport */
+      right: 0; /* Align to right of viewport */
+      width: 100%; /* Full width on mobile */
+      max-width: 300px; /* Max width for desktop dropdown */
+      height: 100vh; /* Take full viewport height */
+      background-color: var(--card-bg);
+      border-left: 1px solid var(--border); /* Changed from border-top */
+      box-shadow: 0 8px 20px rgba(0, 204, 255, 0.3);
+      transform: translateX(100%); /* Start off-screen to the right */
+      transition: transform 0.3s ease-out;
+      padding: 1.5rem 2rem;
+      gap: 1rem;
+      z-index: 999; /* Increased z-index to overlay everything else */
+      overflow-y: auto; /* Enable vertical scrolling */
+      flex-direction: column; /* Ensure content stacks vertically */
+      align-items: flex-start; /* Align items to the start */
+    }
+
+    nav.active {
+      display: flex;
+      transform: translateX(0); /* Slide in */
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      /* Always vertical */
+      gap: 1rem;
+      width: 100%;
+      align-items: flex-start;
+      /* Align links to the left */
+      padding-top: 5rem; /* Add padding to account for header/top */
+      margin-bottom: 2rem; /* Space before utility items */
+    }
+
+    nav a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease, text-shadow 0.3s ease, transform 0.2s ease;
+      padding: 0.6rem 0;
+      white-space: nowrap;
+      position: relative;
+      width: 100%;
+      /* Make links take full width for better click area */
+      text-align: left;
+      /* Align text to left */
+    }
+
+    nav a:hover,
+    nav a.active {
+      color: var(--primary);
+      text-shadow: 0 0 6px var(--primary);
+      transform: translateY(-2px);
+    }
+
+    nav a.active::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: 2px;
+      background-color: var(--primary);
+      box-shadow: 0 0 8px var(--primary);
+      animation: underlineGrow 0.3s forwards;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes underlineGrow {
+      from {
+        transform: scaleX(0);
+      }
+
+      to {
+        transform: scaleX(1);
+      }
+    }
+
+    /* Auth Status & Buttons within Nav (Hamburger Menu) */
+    .nav-utility-items {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(0, 204, 255, 0.1);
+      align-items: flex-start;
+      /* Align to left */
+    }
+
+    .auth-status {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      /* Ensure it doesn't overflow */
+      text-align: left;
+    }
+
+    .nav-utility-items button {
+      background-color: var(--primary);
+      color: var(--background);
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: bold;
+      transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+      box-shadow: 0 6px 15px rgba(0, 204, 255, 0.4);
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+      letter-spacing: 0.5px;
+      width: auto;
+      /* Allow buttons to size naturally */
+    }
+
+    .nav-utility-items button:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(0, 204, 255, 0.6);
+    }
+
+
+    /* --- Main Content Area --- */
+    main {
+      flex-grow: 1;
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+      position: relative;
+      z-index: 1;
+    }
+
+    section {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      /* More rounded corners */
+      padding: 2.5rem;
+      /* More padding */
+      margin-bottom: 2.5rem;
+      /* More margin */
+      box-shadow: 0 8px 25px rgba(0, 204, 255, 0.3);
+      /* Stronger shadow */
+      animation: fadeIn 0.6s ease-out;
+      display: none;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      /* Add transition for hover */
+    }
+
+    section:hover {
+      transform: translateY(-5px);
+      /* Lift on hover */
+      box-shadow: 0 12px 35px rgba(0, 204, 255, 0.3);
+      /* Enhance shadow on hover */
+    }
+
+    section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    h1,
+    h2,
+    h3 {
+      color: var(--primary);
+      margin-bottom: 1.2rem;
+      text-shadow: 0 0 8px rgba(0, 204, 255, 0.4);
+      font-weight: 700;
+    }
+
+    h1 {
+      font-size: 2.8rem;
+    }
+
+    h2 {
+      font-size: 2rem;
+    }
+
+    h3 {
+      font-size: 1.6rem;
+    }
+
+    p {
+      line-height: 1.8;
+      margin-bottom: 1.2rem;
+      color: var(--text);
+    }
+
+    /* --- Buttons --- */
+    .button,
+    button {
+      background-color: var(--primary);
+      color: var(--background);
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      /* More rounded */
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-weight: bold;
+      transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+      box-shadow: 0 6px 15px rgba(0, 204, 255, 0.4);
+      /* Stronger shadow */
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+
+    .button:hover,
+    button:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-3px);
+      /* More lift */
+      box-shadow: 0 10px 25px rgba(0, 204, 255, 0.6);
+      /* Stronger hover shadow */
+    }
+
+    .button:active,
+    button:active {
+      transform: translateY(0);
+      box-shadow: 0 4px 10px rgba(0, 204, 255, 0.3);
+    }
+
+    .secondary-button {
+      background-color: transparent;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+      box-shadow: none;
+      /* Remove default shadow */
+    }
+
+    .secondary-button:hover {
+      background-color: rgba(0, 204, 255, 0.1);
+      box-shadow: 0 0 15px rgba(0, 204, 255, 0.4);
+      /* Add subtle glow on hover */
+    }
+
+    .danger-button {
+      background-color: var(--decline-color);
+      box-shadow: 0 6px 15px rgba(220, 53, 69, 0.4);
+    }
+
+    .danger-button:hover {
+      background-color: #c82333;
+      box-shadow: 0 10px 25px rgba(220, 53, 69, 0.6);
+    }
+
+    /* --- Forms & Inputs --- */
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      /* More space between fields */
+      margin-top: 1.8rem;
+    }
+
+    form label {
+      font-weight: bold;
+      color: var(--primary);
+      font-size: 1.05rem;
+    }
+
+    form input[type="text"],
+    form input[type="email"],
+    form input[type="password"],
+    form input[type="number"],
+    form input[type="url"],
+    form textarea,
+    form select {
+      background-color: rgba(26, 26, 26, 0.8);
+      /* Slightly transparent card-bg */
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.9rem;
+      color: var(--text);
+      font-size: 1rem;
+      width: 100%;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    form input[type="text"]:focus,
+    form input[type="email"]:focus,
+    form input[type="password"]:focus,
+    form input[type="number"]:focus,
+    form input[type="url"]:focus,
+    form textarea:focus,
+    form select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 12px rgba(0, 204, 255, 0.6);
+    }
+
+    #auth-section {
+      text-align: center;
+    }
+
+    #auth-form {
+      max-width: 450px;
+      /* Slightly wider */
+      margin: 0 auto;
+      padding: 2.5rem;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0, 204, 255, 0.2);
+    }
+
+    #login-form,
+    #register-form {
+      display: none;
+    }
+
+    #login-form.active,
+    #register-form.active {
+      display: flex;
+    }
+
+    #auth-mode-toggle {
+      margin-top: 1.5rem;
+      font-size: 1rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      text-decoration: underline;
+      transition: color 0.3s ease;
+    }
+
+    #auth-mode-toggle:hover {
+      color: var(--primary);
+    }
+
+    #admin-panel {
+      margin-top: 2.5rem;
+      text-align: left;
+    }
+
+    /* --- Message Boxes --- */
+    .message-container {
+      position: fixed;
+      top: 20px; /* Position from the top */
+      left: 50%; /* Center horizontally */
+      transform: translateX(-50%); /* Adjust for exact centering */
+      width: 90%;
+      max-width: 550px;
+      z-index: 9999; /* Ensures it overlays ALL other UI, including header */
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      /* More space between messages */
+    }
+
+    .message {
+      padding: 1.2rem;
+      border-radius: 10px;
+      font-weight: bold;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: slideInFromTop 0.4s ease-out forwards;
+    }
+
+    @keyframes slideInFromTop {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message.success {
+      background-color: var(--success-msg-bg);
+      border: 1px solid var(--claim-ready);
+      color: var(--claim-ready);
+    }
+
+    .message.error {
+      background-color: var(--error-msg-bg);
+      border: 1px solid var(--error);
+      color: var(--error);
+    }
+
+    .message.info {
+      background-color: var(--info-msg-bg);
+      border: 1px solid var(--primary);
+      color: var(--primary);
+    }
+
+    .message.warning {
+      background-color: rgba(255, 204, 0, 0.2);
+      color: var(--warning);
+      border: 1px solid var(--warning);
+    }
+
+    .message-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      /* Larger close button */
+      color: inherit;
+      cursor: pointer;
+      margin-left: 1.5rem;
+      transition: transform 0.2s ease;
+    }
+
+    .message-close:hover {
+      transform: scale(1.2);
+    }
+
+    /* --- Search Input Containers (New Styles) --- */
+    .search-input-group {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      /* Increased from 350px */
+      margin-right: 1.5rem;
+      /* Slightly more space */
+    }
+
+    .search-input-group input {
+      padding: 1rem 3rem;
+      /* Increased padding for bigger input */
+      font-size: 1rem;
+      /* Slightly larger font */
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background-color: rgba(26, 26, 26, 0.7);
+      color: var(--text);
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 204, 255, 0.1);
+    }
+
+    .search-input-group input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 15px rgba(0, 204, 255, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .search-input-group input::placeholder {
+      color: var(--text-secondary);
+      opacity: 0.7;
+    }
+
+    .search-input-group .search-icon,
+    .search-input-group .clear-search-button {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      /* Slightly larger icon */
+      pointer-events: none;
+      /* Allow clicks to pass through to input */
+      transition: color 0.3s ease;
+    }
+
+    .search-input-group .search-icon {
+      left: 1.2rem;
+      /* Adjust icon position */
+    }
+
+    .search-input-group .clear-search-button {
+      right: 1.2rem;
+      /* Adjust clear button position */
+      pointer-events: auto;
+      /* Make button clickable */
+      cursor: pointer;
+      font-size: 1.4rem;
+      /* Slightly larger clear button */
+      color: var(--error);
+      display: none;
+      /* Hidden by default */
+      transition: transform 0.2s ease, color 0.3s ease;
+      /* Added animation */
+    }
+
+    .search-input-group .clear-search-button:hover {
+      color: var(--primary);
+      transform: translateY(-50%) scale(1.1);
+      /* Added animation */
+    }
+
+    /* Search results dropdown styling */
+    .user-search-results {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+      z-index: 20;
+      max-height: 200px;
+      overflow-y: auto;
+      display: none;
+      /* Hidden by default */
+    }
+
+    .user-search-results.active {
+      display: block;
+    }
+
+    .user-search-result-item {
+      padding: 0.8rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      color: var(--text);
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      border-bottom: 1px solid rgba(0, 204, 255, 0.1);
+    }
+
+    .user-search-result-item:last-child {
+      border-bottom: none;
+    }
+
+    .user-search-result-item:hover {
+      background-color: rgba(0, 204, 255, 0.08);
+    }
+
+    .user-search-result-item img {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid var(--primary);
+    }
+
+    /* --- Daily Claim & Leaderboard --- */
+    #daily-claim-button {
+      display: block;
+      margin: 2.5rem auto 1.5rem;
+      width: fit-content;
+      font-size: 1.5rem;
+      padding: 1.2rem 3rem;
+      border-radius: 10px;
+    }
+
+    #daily-claim-status {
+      text-align: center;
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      margin-top: 1.2rem;
+      font-weight: 500;
+    }
+
+    #daily-claim-status.claim-ready {
+      color: var(--claim-ready);
+      font-weight: bold;
+      text-shadow: 0 0 10px var(--claim-ready-shadow);
+      animation: pulse-green 1.8s infinite alternate;
+    }
+
+    @keyframes pulse-green {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        /* Adjusted rgba for smoother glow */
+      }
+
+      50% {
+        transform: scale(1.03);
+        box-shadow: 0 0 25px rgba(0, 255, 136, 0.6);
+        /* Adjusted rgba for smoother glow */
+      }
+
+      100% {
+        transform: scale(1);
+        box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        /* Adjusted rgba for smoother glow */
+      }
+    }
+
+    #daily-claim-button.claimed {
+      background-color: var(--primary-dark);
+      cursor: not-allowed;
+      opacity: 0.7;
+      box-shadow: none;
+    }
+
+    .countdown-display {
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 1.3em;
+      color: var(--primary);
+      text-shadow: 0 0 5px var(--primary);
+    }
+
+    /* --- Post Items (Changelogs, Bulletins, Blogs) --- */
+    .post-item {
+      background-color: var(--background);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 0 20px rgba(0, 204, 255, 0.1);
+      position: relative;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .post-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0 30px rgba(0, 204, 255, 0.2);
+    }
+
+    .post-item h3 {
+      color: var(--primary);
+      margin-bottom: 0.8rem;
+      font-size: 1.8rem;
+    }
+
+    .post-item p {
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+      word-wrap: break-word;
+    }
+
+    .blog-meta {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .blog-meta .pfp-small {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--secondary);
+      cursor: pointer;
+    }
+
+    .blog-meta .author-name {
+      font-weight: bold;
+      color: var(--secondary);
+      cursor: pointer;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .blog-meta .author-name:hover {
+      color: var(--secondary-dark);
+      text-decoration: underline;
+    }
+
+    .delete-button {
+      background-color: var(--decline-color);
+      color: white;
+      border: none;
+      padding: 0.7rem 1.4rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      position: absolute;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      transition: background-color 0.3s, transform 0.2s;
+      box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+    }
+
+    .delete-button:hover {
+      background-color: #c82333;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(220, 53, 69, 0.5);
+    }
+
+    .add-form-container {
+      margin-top: 2.5rem;
+      padding: 2rem;
+      background-color: var(--background);
+      border: 1px solid var(--primary);
+      border-radius: 12px;
+      box-shadow: 0 0 25px rgba(0, 204, 255, 0.4);
+    }
+
+    /* Blog Pagination Controls */
+    .blog-pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1.5rem;
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(0, 204, 255, 0.1);
+    }
+
+    .blog-pagination button {
+      background-color: var(--primary-dark);
+      color: var(--text);
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: bold;
+      transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0, 204, 255, 0.3);
+    }
+
+    .blog-pagination button:hover:not(:disabled) {
+      background-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(0, 204, 255, 0.5);
+    }
+
+    .blog-pagination button:disabled {
+      background-color: #333;
+      color: #777;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .blog-pagination span {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+    }
+
+    /* --- Home Section Specifics (New Channels Grid) --- */
+    #home-section .main-title {
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-shadow: 0 0 20px rgba(0, 204, 255, 0.6);
+      margin-bottom: 2rem;
+      animation: glow 2s infinite alternate;
+    }
+
+    @keyframes glow {
+      from {
+        text-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary);
+      }
+
+      to {
+        text-shadow: 0 0 20px var(--primary), 0 0 30px var(--primary-dark);
+      }
+    }
+
+    #home-section .clan-description {
+      background-color: var(--background);
+      padding: 1.8rem 2.5rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0, 204, 255, 0.1);
+      line-height: 1.6;
+      font-size: 1.2rem;
+      max-width: 900px;
+      margin: 2.5rem auto;
+      text-align: center;
+      border: 1px solid rgba(0, 204, 255, 0.2);
+    }
+
+    .home-channels-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .channel-card {
+      background-color: var(--card-bg);
+      padding: 2rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 6px 20px rgba(0, 204, 255, 0.15);
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 180px; /* Set a consistent minimum height for all cards */
+    }
+
+    .channel-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 40px rgba(0, 204, 255, 0.4);
+      background-color: #2a2a2a;
+    }
+
+    .channel-card h3 {
+      color: var(--secondary);
+      font-size: 1.6rem;
+      margin-bottom: 0.8rem;
+      border-bottom: 2px solid rgba(0, 255, 136, 0.4);
+      padding-bottom: 0.8rem;
+      text-shadow: 0 0 5px rgba(0, 255, 136, 0.3);
+    }
+
+    .channel-card p {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      flex-grow: 1;
+      margin-bottom: 0;
+    }
+
+    .coming-soon {
+      color: var(--primary);
+      font-style: italic;
+      font-weight: 600;
+      font-size: 1.3rem;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    /* --- Shop Section Styles --- */
+    #shop-section .shop-items-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .shop-item-card {
+      background-color: var(--background);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+      /* Enhanced transition */
+      box-shadow: 0 0 15px rgba(0, 255, 136, 0.15);
+      /* Greenish glow for shop items */
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .shop-item-card:hover {
+      transform: translateY(-8px);
+      /* More lift */
+      box-shadow: 0 0 30px rgba(0, 255, 136, 0.4);
+      /* Stronger glow */
+      background-color: rgba(26, 26, 26, 0.9);
+    }
+
+    .shop-item-card img {
+      max-width: 100px;
+      height: auto;
+      margin: 0 auto 1rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .shop-item-card h3 {
+      color: var(--secondary);
+      font-size: 1.4rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .shop-item-card p {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+      flex-grow: 1;
+      /* Allow description to take space */
+    }
+
+    .shop-item-card .price-stock {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      border-top: 1px solid rgba(0, 255, 136, 0.2);
+      padding-top: 1rem;
+    }
+
+    .shop-item-card .price {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .shop-item-card .stock {
+      font-size: 1rem;
+      color: var(--text);
+    }
+
+    .shop-item-card button {
+      width: 100%;
+      padding: 0.8rem;
+      font-size: 1rem;
+      border-radius: 6px;
+      background-color: var(--secondary);
+      /* Green buy button */
+      color: var(--background);
+      box-shadow: 0 4px 10px rgba(0, 255, 136, 0.4);
+      transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+      /* Added animation */
+    }
+
+    .shop-item-card button:hover:not(:disabled) {
+      background-color: var(--secondary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(0, 255, 136, 0.6);
+    }
+
+    .shop-item-card button:disabled {
+      background-color: #333;
+      color: #777;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+
+    /* --- Responsive Adjustments --- */
+    @media (max-width: 768px) {
+      header {
+        padding: 1rem 1.5rem;
+        flex-direction: row;
+        /* Keep row for main elements */
+        flex-wrap: wrap;
+        /* Allow wrapping */
+        justify-content: space-between;
+        /* Distribute items */
+      }
+
+      .logo {
+        font-size: 1.6rem;
+        flex-shrink: 0;
+      }
+
+      .realm-coin-display {
+        margin-left: 0.5rem;
+        padding: 0.3rem 0.8rem;
+        flex-shrink: 0;
+      }
+
+      .realm-coin-amount {
+        font-size: 0.9rem;
+      }
+
+      /* User search in header on small screens */
+      .search-input-group {
+        width: 100%;
+        /* Full width */
+        order: 3;
+        /* Push to new row below logo/coins */
+        margin-top: 1rem;
+        margin-right: 0;
+      }
+
+      .nav-toggle {
+        margin-left: auto;
+        /* Push to right */
+        order: 2;
+        /* Keep it right */
+      }
+
+      nav {
+        width: 100%;
+        left: 0;
+        right: auto;
+        /* Reset right alignment */
+      }
+
+      nav ul {
+        align-items: flex-start;
+        gap: 0.8rem;
+      }
+
+      .nav-utility-items {
+        align-items: flex-start;
+      }
+
+      main {
+        padding: 1rem;
+      }
+
+      section {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      h1 {
+        font-size: 2.2rem;
+      }
+
+      h2 {
+        font-size: 1.6rem;
+      }
+
+      h3 {
+        font-size: 1.3rem;
+      }
+
+      #daily-claim-button {
+        font-size: 1.2rem;
+        padding: 1rem 2rem;
+      }
+
+      #daily-claim-status {
+        font-size: 1rem;
+      }
+
+      .shop-items-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .shop-item-card {
+        padding: 1rem;
+      }
+
+      .shop-item-card h3 {
+        font-size: 1.2rem;
+      }
+
+      .shop-item-card p {
+        font-size: 0.85rem;
+      }
+
+      .shop-item-card .price-stock {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+
+      .shop-item-card button {
+        font-size: 0.9rem;
+        padding: 0.7rem;
+      }
+
+      .notifications-dropdown {
+        width: 95vw;
+        /* Even wider on very small screens */
+        right: 2.5vw;
+        /* Center it better */
+      }
+    }
+
+    /* --- Games Section (Spin The Wheel) --- */
+    #games-section {
+      text-align: center;
+    }
+
+    #spin-the-wheel-container {
+      margin-top: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      position: relative;
+      /* For the pin */
+    }
+
+    #wheelCanvas {
+      background-color: var(--background);
+      border: 5px solid var(--primary);
+      border-radius: 50%;
+      box-shadow: 0 0 30px rgba(0, 204, 255, 0.8), inset 0 0 20px rgba(0, 204, 255, 0.5);
+      transition: transform 4s cubic-bezier(0.2, 0.8, 0.2, 1);
+      /* Smooth spin transition */
+      display: block;
+      max-width: 100%;
+      height: auto;
+      position: relative;
+      /* For drawing on top */
+    }
+
+    /* Spin Wheel Pin/Indicator */
+    #wheel-pin {
+      position: absolute;
+      top: -20px;
+      /* Position above the wheel */
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-bottom: 30px solid var(--error);
+      /* Red triangle */
+      z-index: 10;
+      filter: drop-shadow(0 0 10px rgba(255, 77, 77, 0.8));
+    }
+
+
+    #wheel-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    #spin-button,
+    #buy-spin-button {
+      padding: 1.2rem 2.5rem;
+      font-size: 1.3rem;
+      border-radius: 10px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      /* For ripple effect */
+      border: 2px solid transparent;
+      /* Add border for hover effect */
+    }
+
+    #spin-button {
+      background-color: var(--secondary);
+      color: var(--background);
+      box-shadow: 0 6px 20px rgba(0, 255, 136, 0.5);
+    }
+
+    #spin-button:hover:not(:disabled) {
+      background-color: var(--secondary-dark);
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 10px 30px rgba(0, 255, 136, 0.7);
+      border-color: var(--secondary);
+      /* Glow effect on border */
+    }
+
+    #buy-spin-button {
+      background-color: var(--primary);
+      color: var(--background);
+      box-shadow: 0 6px 20px rgba(0, 204, 255, 0.5);
+    }
+
+    #buy-spin-button:hover:not(:disabled) {
+      background-color: var(--primary-dark);
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 10px 30px rgba(0, 204, 255, 0.7);
+      border-color: var(--primary);
+      /* Glow effect on border */
+    }
+
+    #spin-button:disabled,
+    #buy-spin-button:disabled {
+      background-color: #333;
+      color: #777;
+      cursor: not-allowed;
+      box-shadow: none;
+      opacity: 0.6;
+    }
+
+    #spin-cooldown-status {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      margin-top: 1rem;
+      font-weight: 500;
+    }
+
+    #spin-cooldown-status.ready {
+      color: var(--claim-ready);
+      font-weight: bold;
+      text-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+      /* Adjusted rgba for smoother glow */
+      animation: pulse-green 1.8s infinite alternate;
+    }
+
+    /* Admin Panel - Add Realm Coins */
+    #add-realm-coins-form {
+      margin-top: 2.5rem;
+      padding: 2rem;
+      background-color: var(--background);
+      border: 1px solid var(--primary);
+      border-radius: 12px;
+      box-shadow: 0 0 25px rgba(0, 204, 255, 0.4);
+    }
+
+    #add-realm-coins-form h2 {
+      margin-bottom: 1.5rem;
+    }
+
+    #add-realm-coins-form .input-group {
+      margin-bottom: 1rem;
+    }
+
+    #add-realm-coins-form .input-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    #add-realm-coins-form .input-group input {
+      width: 100%;
+      padding: 0.8rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background-color: rgba(26, 26, 26, 0.8);
+      color: var(--text);
+    }
+
+    #add-realm-coins-form .input-group input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 8px rgba(0, 204, 255, 0.6);
+    }
+
+    #add-realm-coins-form button {
+      margin-top: 1.5rem;
+      width: auto;
+      padding: 0.8rem 2rem;
+    }
+
+    /* Email Verification Banner */
+    .email-verify-banner {
+      background-color: var(--warning);
+      color: var(--background);
+      padding: 1rem;
+      text-align: center;
+      font-weight: bold;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      display: none;
+      /* Hidden by default */
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      box-shadow: 0 4px 15px rgba(255, 204, 0, 0.4);
+    }
+
+    .email-verify-banner.active {
+      display: flex;
+    }
+
+    .email-verify-banner button {
+      background-color: var(--background);
+      color: var(--warning);
+      border: 1px solid var(--warning);
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .email-verify-banner button:hover:not(:disabled) {
+      background-color: var(--warning);
+      color: var(--background);
+      box-shadow: 0 0 15px rgba(255, 204, 0, 0.6);
+    }
+
+    .email-verify-banner button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      background-color: #333;
+      color: #777;
+      border-color: #555;
+    }
+
+    /* --- Trade Calculator Section Styles --- */
+    #trade-calculator-section .trade-calculator-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      #trade-calculator-section .trade-calculator-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .trade-column {
+      background-color: var(--background);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 15px rgba(0, 204, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .trade-column h3 {
+      color: var(--secondary);
+      margin-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+      padding-bottom: 0.5rem;
+    }
+
+    .trade-column select,
+    .trade-column input[type="number"] {
+      background-color: rgba(26, 26, 26, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.8rem;
+      color: var(--text);
+      font-size: 1rem;
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
+
+    .trade-column button {
+      width: 100%;
+      padding: 0.8rem;
+      font-size: 1rem;
+      border-radius: 6px;
+      background-color: var(--primary-dark);
+      color: var(--background);
+      box-shadow: 0 4px 10px rgba(0, 204, 255, 0.3);
+    }
+
+    .trade-column button:hover {
+      background-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(0, 204, 255, 0.5);
+    }
+
+    .item-list {
+      border: 1px solid rgba(0, 204, 255, 0.2);
+      border-radius: 8px;
+      padding: 0.8rem;
+      min-height: 150px;
+      max-height: 300px;
+      overflow-y: auto;
+      background-color: rgba(10, 10, 10, 0.5);
+      margin-top: 1rem;
+    }
+
+    .item-list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px dashed rgba(0, 204, 255, 0.1);
+      color: var(--text);
+    }
+
+    .item-list-item:last-child {
+      border-bottom: none;
+    }
+
+    .item-list-item .remove-item {
+      background: none;
+      border: none;
+      color: var(--error);
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .item-list-item .remove-item:hover {
+      transform: scale(1.2);
+    }
+
+    .trade-summary {
+      margin-top: 2rem;
+      background-color: var(--card-bg);
+      border: 1px solid var(--secondary);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 8px 25px rgba(0, 255, 136, 0.2);
+    }
+
+    .trade-summary p {
+      font-size: 1.3rem;
+      margin-bottom: 0.8rem;
+      color: var(--text);
+    }
+
+    .trade-summary strong {
+      color: var(--primary);
+      font-size: 1.4rem;
+    }
+
+    .trade-summary #trade-result {
+      font-size: 1.8rem;
+      font-weight: bold;
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(0, 255, 136, 0.3);
+    }
+
+    .trade-summary #trade-result.fair {
+      color: var(--secondary);
+      text-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
+    }
+
+    .trade-summary #trade-result.overpay {
+      color: var(--error);
+      text-shadow: 0 0 10px rgba(255, 77, 77, 0.6);
+    }
+
+    .trade-summary #trade-result.underpay {
+      color: var(--warning);
+      text-shadow: 0 0 10px rgba(255, 204, 0, 0.6);
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="backgroundCanvas"></canvas>
+
+  <header>
+    <a href="#" class="logo" id="shinigami-realm-logo">Shinigami Realm</a>
+    <div class="realm-coin-display" onclick="displaySection('daily-realm-coin-section')">
+      <i class="fas fa-diamond realm-coin-icon"></i>
+      <span class="realm-coin-amount" id="current-realm-coin">0</span>
+    </div>
+    <div class="header-spacer"></div>
+    <div class="notification-bell-container">
+      <button class="notification-bell" id="notification-bell">
+        <i class="fas fa-bell"></i>
+        <span class="notification-count" id="notification-count">0</span>
+      </button>
+      <div class="notifications-dropdown" id="notifications-dropdown">
+        <h3>Notifications</h3>
+        <div id="notifications-list">
+          <p style="text-align: center; color: var(--text-secondary);">No new notifications.</p>
+        </div>
+      </div>
+    </div>
+    <button class="nav-toggle" id="nav-toggle">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <nav id="nav-menu">
+      <ul>
+        <li><a href="#home-section" class="nav-link active">Home</a></li>
+        <li><a href="#about-section" class="nav-link">About Us</a></li>
+        <li><a href="#changelogs-section" class="nav-link">Changelogs</a></li>
+        <li><a href="#bulletins-section" class="nav-link">Bulletins</a></li>
+        <li><a href="#games-section" class="nav-link">Games</a></li>
+        <li><a href="#daily-realm-coin-section" class="nav-link">Daily Realm Coin</a></li>
+        <li><a href="#shop-section" class="nav-link">Shop</a></li>
+        <li><a href="#blogs-section" class="nav-link">Blogs</a></li>
+        <li><a href="#giveaways-section" class="nav-link">Giveaways</a></li>
+        <li><a href="#events-section" class="nav-link">Events</a></li>
+        <li><a href="#trade-calculator-section" class="nav-link">Trade Calculator</a></li>
+        <li id="my-profile-nav-item" style="display: none;"><a href="#my-profile-section" class="nav-link">My Profile</a></li>
+        <li id="admin-nav-item" style="display: none;"><a href="#admin-section" class="nav-link">Admin</a></li>
+      </ul>
+      <div class="nav-utility-items">
+        <li id="auth-status-nav-item" style="display: none;">
+          <p class="auth-status" id="auth-status-text"></p>
+        </li>
+        <li id="login-nav-item"><button id="login-nav-button">Login / Register</button></li>
+        <li id="logout-nav-item" style="display: none;"><button id="logout-button">Logout</button></li>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <div id="message-container" class="message-container"></div>
+    <div id="email-verify-banner" class="email-verify-banner">
+      Please verify your email to access all features.
+      <button id="send-verify-email-button">Resend Verification Email</button>
+    </div>
+
+    <section id="home-section" class="active">
+      <h1 class="main-title">Welcome to Shinigami Realm</h1>
+      <div class="clan-description">
+        <p>Your ultimate community hub for Blox Fruits! Join us to trade, share news, track values, and connect with
+          other players in the vast and exciting world of Blox Fruits. Our realm is built for transparency, fairness,
+          and fun.</p>
+      </div>
+
+      <h2>Explore Our Channels</h2>
+      <div class="home-channels-grid">
+        <div class="channel-card" onclick="displaySection('games-section')">
+          <h3>Games</h3>
+          <p>Spin the wheel for a chance to win Realm Coins!</p>
+        </div>
+        <div class="channel-card" onclick="displaySection('changelogs-section')">
+          <h3>Changelogs</h3>
+          <p>Stay updated with all the new features, bug fixes, and improvements in Shinigami Realm.</p>
+        </div>
+        <div class="channel-card" onclick="displaySection('bulletins-section')">
+          <h3>Bulletins</h3>
+          <p>Important announcements and news from the Shinigami Realm administration.</p>
+        </div>
+        <div class="channel-card" onclick="displaySection('daily-realm-coin-section')">
+          <h3>Daily Realm Coin</h3>
+          <p>Claim your daily bonus coins and boost your in-game economy. Consistency is key!</p>
+        </div>
+        <div class="channel-card" onclick="displaySection('blogs-section')">
+          <h3>Community Blogs</h3>
+          <p>Read and share amazing content from our community members. Your stories, guides, and insights matter!</p>
+        </div>
+        <div class="channel-card" onclick="displaySection('shop-section')">
+          <h3>Shop</h3>
+          <p>Discover items and upgrades for your journey. Purchase with your Realm Coins!</p>
+        </div>
+        <div class="channel-card" onclick="displaySection('about-section')">
+          <h3>About Us</h3>
+          <p>Learn more about Shinigami Realm, our mission, and meet the dedicated staff behind the community.</p>
+        </div>
+        <div class="channel-card" onclick="displaySection('giveaways-section')">
+          <h3>Giveaways</h3>
+          <p>Participate in exciting giveaways for a chance to win amazing prizes!</p>
+        </div>
+        <div class="channel-card" onclick="displaySection('events-section')">
+          <h3>Events</h3>
+          <p>Stay tuned for exciting community events and challenges!</p>
+        </div>
+        <div class="channel-card" onclick="displaySection('trade-calculator-section')">
+          <h3>Trade Calculator</h3>
+          <p>Calculate the fairness of your Blox Fruits trades based on Beli and Trade values!</p>
+        </div>
+        <div class="channel-card" onclick="displaySection('my-profile-section')" id="my-profile-home-card" style="display: none;">
+          <h3>My Profile</h3>
+          <p>View and edit your personal details, profile picture, and display name.</p>
+        </div>
+        </div>
+    </section>
+
+    <section id="about-section">
+      <h1>About Us</h1>
+      <p>Shinigami Realm is a dedicated Blox Fruits community, striving to provide valuable resources and a fun
+        environment for all players.</p>
+      <p>Our goal is to help you maximize your Blox Fruits experience with accurate trade values, timely updates, and
+        engaging content.</p>
+      <div class="staff-section">
+        <h2>Our Dedicated Staff</h2>
+        <div class="staff-list">
+          <p><strong>Owner:</strong> mud</p>
+          <p><strong>Co-Owner:</strong> aq.17d , Batman</p>
+          <p><strong>Moderator:</strong> rip_gojo</p>
+          <p><strong>Community Manager:</strong> GREED , chicken</p>
+        </div>
+      </div>
+      <p style="margin-top: 1.5rem;">For support, suggestions, or to report issues, please join our Discord server:</p>
+      <a href="https://discord.gg/NgbcrWSVm5" target="_blank" class="button secondary-button">Join Our Discord!</a>
+    </section>
+
+    <section id="changelogs-section">
+      <h1>Changelogs</h1>
+      <div id="changelogs-container">
+      </div>
+    </section>
+
+    <section id="bulletins-section">
+      <h1>Bulletins</h1>
+      <div id="bulletins-container">
+      </div>
+    </section>
+
+    <section id="games-section">
+      <h1>Games</h1>
+      <p>Test your luck and win Realm Coins!</p>
+
+      <div id="spin-the-wheel-container">
+        <canvas id="wheelCanvas" width="400" height="400"></canvas>
+        <div id="wheel-pin"></div>
+        <div id="wheel-actions">
+          <button id="spin-button">Spin for Free!</button>
+          <button id="buy-spin-button">Buy Spin (5 Coins)</button>
+        </div>
+        <p id="spin-cooldown-status"></p>
+        <p id="last-spin-result" style="font-size: 1.2rem; color: var(--secondary); font-weight: bold; margin-top: 1rem;"></p>
+      </div>
+    </section>
+
+    <section id="daily-realm-coin-section">
+      <h1>Daily Realm Coin</h1>
+      <p>Claim your daily Realm Coins to boost your balance!</p>
+      <button id="daily-claim-button">Claim Daily Realm Coin</button>
+      <p id="daily-claim-status"></p>
+    </section>
+
+    <section id="shop-section">
+      <h1>Shinigami Realm Shop</h1>
+      <p>Spend your hard-earned Realm Coins on exclusive items!</p>
+      <div id="shop-items-container" class="shop-items-grid">
+        <p>No items in the shop yet. Check back later!</p>
+      </div>
+    </section>
+
+    <section id="blogs-section">
+      <h1>Community Blogs</h1>
+      <div id="add-blog-container" class="add-form-container">
+        <h2>Add New Blog Post</h2>
+        <form id="add-blog-form">
+          <label for="blog-title">Title:</label>
+          <input type="text" id="blog-title" maxlength="100" required />
+          <label for="blog-content">Content:</label>
+          <textarea id="blog-content" rows="10" maxlength="2000" required></textarea>
+          <button type="submit">Publish Blog Post</button>
+        </form>
+      </div>
+      <div id="blogs-container">
+      </div>
+      <div id="blog-pagination-controls" class="blog-pagination" style="display: none;">
+        <button id="prev-blog-page">Previous</button>
+        <span id="blog-page-info">Page 1 of 1</span>
+        <button id="next-blog-page">Next</button>
+      </div>
+    </section>
+
+    <section id="giveaways-section">
+      <h1>Giveaways</h1>
+      <p class="coming-soon">Waiting for sauce..</p>
+    </section>
+
+    <section id="events-section">
+      <h1>Events</h1>
+      <p class="coming-soon">Waiting for sauce...</p>
+    </section>
+
+    <section id="trade-calculator-section">
+      <h1>Blox Fruits Trade Calculator</h1>
+      <p>Enter the items for each side of the trade to determine its fairness based on Beli and Trade values.</p>
+
+      <div class="trade-calculator-grid">
+        <div class="trade-column">
+          <h3>Your Items</h3>
+          <select id="your-item-select">
+            <option value="">Select Beli Item</option>
+          </select>
+          <button id="add-your-beli-item">Add Beli Item</button>
+          <select id="your-trade-item-select">
+            <option value="">Select Trade Item</option>
+          </select>
+          <button id="add-your-trade-item">Add Trade Item</button>
+
+          <label for="your-custom-beli">Custom Beli Value (e.g., 1000000):</label>
+          <input type="number" id="your-custom-beli" placeholder="Enter Beli amount" min="0">
+          <button id="add-your-custom-beli">Add Custom Beli</button>
+
+          <div id="your-item-list" class="item-list"></div>
+        </div>
+
+        <div class="trade-column">
+          <h3>Their Items</h3>
+          <select id="their-item-select">
+            <option value="">Select Beli Item</option>
+          </select>
+          <button id="add-their-beli-item">Add Beli Item</button>
+          <select id="their-trade-item-select">
+            <option value="">Select Trade Item</select>
+          </select>
+          <button id="add-their-trade-item">Add Trade Item</button>
+
+          <label for="their-custom-beli">Custom Beli Value (e.g., 1000000):</label>
+          <input type="number" id="their-custom-beli" placeholder="Enter Beli amount" min="0">
+          <button id="add-their-custom-beli">Add Custom Beli</button>
+
+          <div id="their-item-list" class="item-list"></div>
+        </div>
+      </div>
+
+      <div class="trade-summary">
+        <h2>Trade Summary</h2>
+        <p>Your Total Beli Value: <strong id="your-total-beli">0</strong></p>
+        <p>Your Total Trade Value: <strong id="your-total-trade">0</strong></p>
+        <p>Their Total Beli Value: <strong id="their-total-beli">0</strong></p>
+        <p>Their Total Trade Value: <strong id="their-total-trade">0</strong></p>
+        <p style="margin-top: 1.5rem;">Beli Difference: <strong id="beli-difference">0</strong></p>
+        <p>Trade Difference: <strong id="trade-difference">0</strong></p>
+        <p id="trade-result" class="fair">Awaiting Calculation</p>
+      </div>
+    </section>
+
+    <section id="admin-section">
+      <h1>Admin Panel</h1>
+      <div id="admin-panel">
+        <h2>Add New Changelog</h2>
+        <form id="add-changelog-form">
+          <label for="changelog-title">Title:</label>
+          <input type="text" id="changelog-title" maxlength="100" required />
+          <label for="changelog-content">Content:</label>
+          <textarea id="changelog-content" rows="5" maxlength="1000" required></textarea>
+          <button type="submit">Add Changelog</button>
+        </form>
+
+        <h2>Add New Bulletin</h2>
+        <form id="add-bulletin-form">
+          <label for="bulletin-title">Title:</label>
+          <input type="text" id="bulletin-title" maxlength="100" required />
+          <label for="bulletin-content">Content:</label>
+          <textarea id="bulletin-content" rows="5" maxlength="1000" required></textarea>
+          <button type="submit">Add Bulletin</button>
+        </form>
+
+        <h2>Add/Update Shop Item</h2>
+        <form id="add-shop-item-form">
+          <label for="shop-item-name">Item Name:</label>
+          <input type="text" id="shop-item-name" maxlength="50" required />
+          <label for="shop-item-description">Description:</label>
+          <textarea id="shop-item-description" rows="3" maxlength="200" required></textarea>
+          <label for="shop-item-price">Price (Realm Coins):</label>
+          <input type="number" id="shop-item-price" min="1" required />
+          <label for="shop-item-stock">Initial Stock:</label>
+          <input type="number" id="shop-item-stock" min="0" required />
+          <button type="submit">Add/Update Item</button>
+        </form>
+
+        <div id="add-realm-coins-form" class="add-form-container">
+          <h2>Add Realm Coins to User</h2>
+          <form id="admin-add-coins-form">
+            <div class="input-group">
+              <label for="admin-target-identifier">User Email or Display Name:</label>
+              <input type="text" id="admin-target-identifier" placeholder="user@example.com or Display Name" required />
+            </div>
+            <div class="input-group">
+              <label for="admin-coin-amount">Amount of Coins to Add:</label>
+              <input type="number" id="admin-coin-amount" min="1" required />
+            </div>
+            <button type="submit">Add Coins</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section id="my-profile-section">
+      <h1>My Profile</h1>
+      <div class="profile-details">
+        <img id="profile-avatar" src="https://placehold.co/120/00ccff/000000?text=PFP" alt="Profile Picture" class="pfp-large">
+        <h2 id="profile-display-name">Loading...</h2>
+        <p><strong>Email:</strong> <span id="profile-email">Loading...</span></p>
+        <p><strong>Realm Coins:</strong> <span id="profile-coins">0</span></p>
+      </div>
+
+      <div class="add-form-container" style="margin-top: 2.5rem;">
+        <h2>Edit Profile</h2>
+        <form id="update-profile-form">
+          <label for="update-display-name">Display Name:</label>
+          <input type="text" id="update-display-name" maxlength="50" required />
+          <label for="update-profile-pic">Profile Picture URL:</label>
+          <input type="url" id="update-profile-pic" placeholder="e.g., https://example.com/your-image.jpg" />
+          <button type="submit">Save Profile</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="auth-section">
+      <h1>Authentication</h1>
+      <div id="auth-form">
+        <form id="login-form" class="active">
+          <h2>Login</h2>
+          <label for="login-email">Email:</label>
+          <input type="email" id="login-email" required />
+          <label for="login-password">Password:</label>
+          <input type="password" id="login-password" required />
+          <button type="submit">Login</button>
+        </form>
+
+        <form id="register-form">
+          <h2>Register</h2>
+          <label for="register-display-name">Display Name:</label>
+          <input type="text" id="register-display-name" maxlength="50" required />
+          <label for="register-email">Email:</label>
+          <input type="email" id="register-email" required />
+          <label for="register-password">Password:</label>
+          <input type="password" id="register-password" required />
+          <button type="submit">Register</button>
+        </form>
+        <p id="auth-mode-toggle">Switch to <span id="toggle-text">Register</span></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+  <script>
+    // --- Firebase Configuration ---
+    // IMPORTANT: These are your actual Firebase project settings.
+    const firebaseConfig = {
+      apiKey: "AIzaSyDa22uXbbmUb2CWU9AEbvqb90nsLZeul4M",
+      authDomain: "shinigami-realm-c5b79.firebaseapp.com",
+      projectId: "shinigami-realm-c5b79",
+      storageBucket: "shinigami-realm-c5b79.firebasestorage.app",
+      messagingSenderId: "540557371652",
+      appId: "1:540557371652:web:67a3f100b1d4c2964b8851", // <--- THIS IS THE FIX!
+      measurementId: "G-G4YV145Q71"
+     };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Explicitly set appId for consistent data paths on GitHub Pages
+    // This value MUST match the appId extracted from firebaseConfig.appId in your HTML.
+    // For your current HTML, this is '67a3f100b1d4c2964b8851'.
+    const appId = firebaseConfig.appId.split(':')[2]; // Extracts the web app ID part
+    console.log('Using hardcoded appId for GitHub Pages:', appId);
+
+    // REMINDER: This is your actual admin email!
+    const ADMIN_EMAIL = "daiwikmjith90@gmail.com";
+    let isAdmin = false;
+    let currentUser = null;
+
+    // REMINDER: Ensure this URL is stable or upload your own default PFP to Firebase Storage!
+    const DEFAULT_PFP = "https://placehold.co/100/00ccff/000000?text=PFP";
+
+
+    // --- UI Elements ---
+    const navToggle = document.getElementById('nav-toggle');
+    const navMenu = document.getElementById('nav-menu'); // This is now the vertical menu container
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('section');
+    const messageContainer = document.getElementById('message-container');
+    const emailVerifyBanner = document.getElementById('email-verify-banner');
+    const sendVerifyEmailButton = document.getElementById('send-verify-email-button');
+
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    const authModeToggle = document.getElementById('auth-mode-toggle');
+    const toggleText = document.getElementById('toggle-text');
+    const logoutButton = document.getElementById('logout-button');
+    const loginNavButton = document.getElementById('login-nav-button'); // New button for login/register in nav
+
+    const adminNavItem = document.getElementById('admin-nav-item');
+    const loginNavItem = document.getElementById('login-nav-item');
+    const logoutNavItem = document.getElementById('logout-nav-item');
+    const realmCoinDisplay = document.querySelector('.realm-coin-display'); // Moved to top level
+    const authStatusNavItem = document.getElementById('auth-status-nav-item');
+    const authStatusText = document.getElementById('auth-status-text');
+
+    // Profile related DOM elements
+    const myProfileNavItem = document.getElementById('my-profile-nav-item');
+    const myProfileHomeCard = document.getElementById('my-profile-home-card');
+    const profileAvatar = document.getElementById('profile-avatar');
+    const profileDisplayName = document.getElementById('profile-display-name');
+    const profileEmail = document.getElementById('profile-email');
+    const profileCoins = document.getElementById('profile-coins');
+    const updateProfileForm = document.getElementById('update-profile-form');
+    const updateDisplayNameInput = document.getElementById('update-display-name');
+    const updateProfilePicInput = document.getElementById('update-profile-pic');
+
+
+    const currentRealmCoin = document.getElementById('current-realm-coin'); // For nav bar display
+
+    const addChangelogForm = document.getElementById('add-changelog-form');
+    const changelogTitleInput = document.getElementById('changelog-title');
+    const changelogContentInput = document.getElementById('changelog-content');
+    const changelogsContainer = document.getElementById('changelogs-container');
+
+    const addBulletinForm = document.getElementById('add-bulletin-form');
+    const bulletinTitleInput = document.getElementById('bulletin-title');
+    const bulletinContentInput = document.getElementById('bulletin-content');
+    const bulletinsContainer = document.getElementById('bulletins-container');
+
+    const addBlogForm = document.getElementById('add-blog-form');
+    const blogTitleInput = document.getElementById('blog-title');
+    const blogContentInput = document.getElementById('blog-content');
+    const blogsContainer = document.getElementById('blogs-container');
+    const addBlogContainer = document.getElementById('add-blog-container');
+    const blogPaginationControls = document.getElementById('blog-pagination-controls');
+    const prevBlogPageButton = document.getElementById('prev-blog-page');
+    const nextBlogPageButton = document.getElementById('next-blog-page');
+    const blogPageInfoSpan = document.getElementById('blog-page-info');
+
+    const dailyClaimButton = document.getElementById('daily-claim-button');
+    const dailyClaimStatus = document.getElementById('daily-claim-status');
+
+    // Shop Section UI Elements
+    const shopItemsContainer = document.getElementById('shop-items-container');
+    const addShopItemForm = document.getElementById('add-shop-item-form');
+    const shopItemNameInput = document.getElementById('shop-item-name');
+    const shopItemDescriptionInput = document.getElementById('shop-item-description');
+    const shopItemPriceInput = document.getElementById('shop-item-price');
+    const shopItemStockInput = document.getElementById('shop-item-stock');
+
+    const adminHomeCard = document.getElementById('admin-home-card');
+    const shinigamiRealmLogo = document.getElementById('shinigami-realm-logo'); // Added for title click
+
+    // Games Section (Spin The Wheel) Elements
+    const wheelCanvas = document.getElementById('wheelCanvas');
+    const spinButton = document.getElementById('spin-button');
+    const buySpinButton = document.getElementById('buy-spin-button');
+    const spinCooldownStatus = document.getElementById('spin-cooldown-status');
+    const lastSpinResult = document.getElementById('last-spin-result');
+    let wheelCtx;
+    let wheelSpinning = false;
+    let currentRotation = 0;
+    const segments = [{
+      text: "1 Coin",
+      color: "#FFD700",
+      value: 1
+    }, {
+      text: "5 Coins",
+      color: "#FF8C00",
+      value: 5
+    }, {
+      text: "2 Coins",
+      color: "#DAA520",
+      value: 2
+    }, {
+      text: "10 Coins",
+      color: "#FF4500",
+      value: 10
+    }, {
+      text: "3 Coins",
+      color: "#FFA07A",
+      value: 3
+    }, {
+      text: "7 Coins",
+      color: "#FF6347",
+      value: 7
+    }];
+    const segmentAngle = 360 / segments.length;
+
+    // Notification System Elements
+    const notificationBell = document.getElementById('notification-bell');
+    const notificationCount = document.getElementById('notification-count');
+    const notificationsDropdown = document.getElementById('notifications-dropdown');
+    const notificationsList = document.getElementById('notifications-list');
+    let unsubscribeNotifications = null; // To manage real-time listener
+
+    // Admin Add Coins Elements
+    const adminAddCoinsForm = document.getElementById('admin-add-coins-form');
+    const adminTargetIdentifierInput = document.getElementById('admin-target-identifier');
+    const adminCoinAmountInput = document.getElementById('admin-coin-amount');
+
+    // Email verification cooldown
+    let emailVerifyCooldownTimer = null;
+    const EMAIL_VERIFY_COOLDOWN_SECONDS = 60; // 60 seconds cooldown
+
+    // Trade Calculator Elements
+    const yourItemSelect = document.getElementById('your-item-select');
+    const addYourBeliItemButton = document.getElementById('add-your-beli-item');
+    const yourTradeItemSelect = document.getElementById('your-trade-item-select');
+    const addYourTradeItemButton = document.getElementById('add-your-trade-item');
+    const yourCustomBeliInput = document.getElementById('your-custom-beli');
+    const addYourCustomBeliButton = document.getElementById('add-your-custom-beli');
+    const yourItemList = document.getElementById('your-item-list');
+
+    const theirItemSelect = document.getElementById('their-item-select');
+    const addTheirBeliItemButton = document.getElementById('add-their-beli-item');
+    const theirTradeItemSelect = document.getElementById('their-trade-item-select');
+    const addTheirTradeItemButton = document.getElementById('add-their-trade-item');
+    const theirCustomBeliInput = document.getElementById('their-custom-beli');
+    const addTheirCustomBeliButton = document.getElementById('add-their-custom-beli');
+    const theirItemList = document.getElementById('their-item-list');
+
+    const yourTotalBeliSpan = document.getElementById('your-total-beli');
+    const yourTotalTradeSpan = document.getElementById('your-total-trade');
+    const theirTotalBeliSpan = document.getElementById('their-total-beli');
+    const theirTotalTradeSpan = document.getElementById('their-total-trade');
+    const beliDifferenceSpan = document.getElementById('beli-difference');
+    const tradeDifferenceSpan = document.getElementById('trade-difference');
+    const tradeResultSpan = document.getElementById('trade-result');
+
+    let yourItems = []; // Stores objects { name: "Item Name", type: "beli"|"trade"|"custom", value: number }
+    let theirItems = [];
+
+    const beliValues = {
+      "Dragon": 15000000,
+      "Kitsune": 8000000,
+      "Yeti": 5000000,
+      "Leo": 5000000,
+      "Spirit": 3400000,
+      "Gas": 3200000,
+      "Control": 3200000,
+      "Venom": 3000000,
+      "Shadow": 2900000,
+      "Dough": 2800000,
+      "T-Rex": 2700000,
+      "Mammoth": 2700000,
+      "Gravity": 2500000,
+      "Blizzard": 2400000,
+      "Pain": 2300000,
+      "Rumble": 2100000,
+      "Portal": 1900000,
+      "Phoenix": 1800000,
+      "Sound": 1700000,
+      "Spider": 1500000,
+      "Creation": 1400000,
+      "Love": 1300000,
+      "Buddha": 1200000,
+      "Quake": 1000000,
+      "Magma": 960000,
+      "Ghost": 940000,
+      "Rubber": 750000,
+      "Light": 650000,
+      "Diamond": 600000,
+      "Eagle": 550000,
+      "Dark": 500000,
+      "Sand": 420000,
+      "Ice": 350000,
+      "Flame": 250000,
+      "Spike": 180000,
+      "Smoke": 100000,
+      "Bomb": 80000,
+      "Spring": 60000,
+      "Blade": 30000,
+      "Spin": 7500,
+      "Rocket": 5000
+    };
+
+    const tradeValues = {
+      "Dragon West": 1200000000,
+      "Dragon East": 960000000,
+      "Kitsune": 240000000,
+      "Yeti": 140000000,
+      "Gas": 75000000,
+      "Leo": 60000000,
+      "Gravity": 45000000,
+      "Leo (Lower)": 30000000, // Renamed to avoid exact duplicate key
+      "T-Rex": 20000000,
+      "Control": 12000000,
+      "Spirit": 10000000,
+      "Mammoth": 10000000,
+      "Venom": 10000000,
+      "Portal": 10000000,
+      "Buddha": 10000000,
+      "Rumble": 7000000,
+      "Shadow": 6000000,
+      "Blizzard": 6000000,
+      "Sound": 4500000,
+      "Phoenix": 4000000,
+      "Creation": 4000000,
+      "Pain": 4000000,
+      "Spider": 1500000,
+      "Diamond": 1500000,
+      "Love": 1250000,
+      "Magma": 1150000,
+      "Quake": 1000000,
+      "Light": 800000,
+      "Ghost": 800000,
+      "Eagle": 800000,
+      "Rubber": 700000,
+      "Ice": 550000,
+      "Sand": 420000,
+      "Dark": 400000,
+      "Flame": 250000,
+      "Spike": 180000,
+      "Smoke": 100000,
+      "Bomb": 80000,
+      "Spring": 60000,
+      "Blade": 30000,
+      "Spin": 7500,
+      "Rocket": 5000
+    };
+
+
+    // --- Utility Functions ---
+
+    /**
+     * Displays a temporary message to the user.
+     * @param {string} msg - The message to display.
+     * @param {'success'|'error'|'info'|'warning'} type - The type of message.
+     */
+    function showMessage(msg, type) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${type}`;
+      messageDiv.innerHTML = `
+        <span>${msg}</span>
+        <button class="message-close">&times;</button>
+      `;
+      messageContainer.prepend(messageDiv);
+
+      messageDiv.querySelector('.message-close').addEventListener('click', () => {
+        messageDiv.remove();
+      });
+
+      setTimeout(() => {
+        messageDiv.remove();
+      }, 5000); // Message disappears after 5 seconds
+    }
+
+    /**
+     * Creates a new notification for the specified user.
+     * @param {string} uid - The UID of the user to notify.
+     * @param {string} message - The notification message.
+     * @param {string} type - The type of notification (e.g., 'coin_gain', 'coin_loss', 'chat', 'giveaway_win').
+     */
+    async function createNotification(uid, message, type) {
+      if (!uid || !message) return;
+
+      try {
+        await db.collection('artifacts').doc(appId).collection('users').doc(uid).collection('notifications').add({
+          message: message,
+          type: type,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          read: false
+        });
+        console.log(`Notification sent to ${uid}: ${message}`);
+      } catch (error) {
+        console.error("Error creating notification:", error.message);
+      }
+    }
+
+    // Profanity Filter
+    const profaneWords = ["badword", "racistword", "fuck", "shit", "bitch", "asshole", "cunt", "nigger", "faggot", "chink", "kike", "pussy", "dick", "damn", "hell"]; // Add more as needed
+
+    function censorText(text) {
+      if (!text) return '';
+      let censored = text;
+      profaneWords.forEach(word => {
+        const regex = new RegExp(`\\b${word}\\b`, 'gi'); // Whole word, case-insensitive
+        censored = censored.replace(regex, '*'.repeat(word.length));
+      });
+      return censored;
+    }
+
+
+    /**
+     * Displays the selected section and hides others.
+     * Fetches content relevant to the section.
+     * @param {string} sectionId - The ID of the section to display (e.g., 'home-section').
+     */
+    function displaySection(sectionId) {
+      // Access restriction: Only allow 'auth-section' if not logged in or email not verified
+      if (sectionId !== 'auth-section' && (!currentUser || !currentUser.emailVerified)) {
+        showMessage("Please login and verify your email to access this section.", "warning");
+        displaySection('auth-section'); // Redirect to auth section
+        return;
+      }
+
+      sections.forEach(section => {
+        section.classList.remove('active');
+      });
+      document.getElementById(sectionId).classList.add('active');
+
+      // Update active nav link
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${sectionId}`) {
+          link.classList.add('active');
+        }
+      });
+
+      // Close mobile nav if open
+      if (navMenu.classList.contains('active')) {
+        navMenu.classList.remove('active');
+        navToggle.classList.remove('active'); // Reset hamburger icon
+      }
+
+      // Close notifications dropdown
+      notificationsDropdown.classList.remove('active');
+
+      // Load content based on section
+      switch (sectionId) {
+        case 'changelogs-section':
+          fetchChangelogs();
+          break;
+        case 'bulletins-section':
+          fetchBulletins();
+          break;
+        case 'games-section':
+          initWheel(); // Initialize wheel canvas
+          updateSpinUI(); // Update spin button/cooldown
+          break;
+        case 'daily-realm-coin-section':
+          updateDailyClaimUI();
+          break;
+        case 'blogs-section':
+          currentBlogPage = 1; // Reset to first page when navigating to blogs
+          fetchBlogs();
+          break;
+        case 'shop-section':
+          fetchShopItems(); // Fetch shop items when shop section is displayed
+          break;
+        case 'my-profile-section':
+          fetchUserProfile(currentUser ? currentUser.uid : null);
+          break;
+        case 'admin-section':
+          if (!isAdmin) {
+            displaySection('home-section'); // Redirect if not admin
+          }
+          break;
+        case 'giveaways-section':
+          // No specific data fetch for giveaways, just display the content
+          break;
+        case 'events-section':
+          // Content is static "Waiting for sauce..."
+          break;
+        case 'trade-calculator-section':
+          populateTradeCalculatorDropdowns();
+          calculateTrade(); // Initial calculation
+          break;
+        case 'home-section':
+          break;
+      }
+    }
+
+
+    // --- Authentication ---
+
+    // Handles user login
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = loginForm['login-email'].value;
+      const password = loginForm['login-password'].value;
+
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        showMessage('Logged in successfully!', 'success');
+        loginForm.reset();
+      }
+      catch (error) {
+        console.error("Login Error:", error.message);
+        showMessage(`Login failed: ${error.message}`, 'error');
+      }
+    });
+
+    // Handles user registration
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const displayName = registerForm['register-display-name'].value;
+      const email = registerForm['register-email'].value;
+      const password = registerForm['register-password'].value;
+
+      // Basic input validation
+      if (displayName.trim() === '' || displayName.length > 50) {
+        showMessage('Display Name is required and must be 50 characters or less.', 'error');
+        return;
+      }
+      if (password.length < 6) { // Firebase Auth requires at least 6 characters
+        showMessage('Password must be at least 6 characters long.', 'error');
+        return;
+      }
+
+      try {
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+
+        // Send email verification
+        await user.sendEmailVerification();
+        showMessage('Registration successful! Please verify your email!', 'success');
+
+        // Set display name in Auth
+        await user.updateProfile({
+          displayName: displayName
+        });
+
+        // Create initial profile data in Firestore
+        await db.collection('artifacts').doc(appId).collection('users').doc(user.uid).collection('profile').doc('data').set({
+          displayName: displayName,
+          profilePictureUrl: DEFAULT_PFP,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          lastPublicChatVisitTimestamp: firebase.firestore.Timestamp.fromDate(new Date(0)),
+        });
+
+        // Create initial currency data in Firestore
+        await db.collection('artifacts').doc(appId).collection('users').doc(user.uid).collection('currency').doc('data').set({
+          realmCoins: 0,
+          lastClaimTime: null,
+          lastSpinTime: null,
+        });
+
+        // Create public user profile for chat search
+        await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('userPublicProfiles').doc(user.uid).set({
+          displayName: displayName,
+          uid: user.uid,
+          email: user.email, // Store full email for search
+          emailPrefix: user.email.substring(0, 5) // Store prefix for easy display
+        });
+
+
+        registerForm.reset();
+      }
+      catch (error) {
+        console.error("Registration Error:", error.message);
+        showMessage(`Registration failed: ${error.message}`, 'error');
+      }
+    });
+
+    // Toggles between login and registration forms
+    authModeToggle.addEventListener('click', () => {
+      if (loginForm.classList.contains('active')) {
+        loginForm.classList.remove('active');
+        registerForm.classList.add('active');
+        toggleText.textContent = 'Login';
+      } else {
+        loginForm.classList.add('active');
+        registerForm.classList.remove('active');
+        toggleText.textContent = 'Register';
+      }
+    });
+
+    // Handle Login/Register button in nav
+    loginNavButton.addEventListener('click', () => {
+      displaySection('auth-section');
+    });
+
+    // Send email verification with cooldown
+    sendVerifyEmailButton.addEventListener('click', async () => {
+      if (!currentUser) {
+        showMessage("No user logged in.", "error");
+        return;
+      }
+      if (currentUser.emailVerified) {
+        showMessage("Your email is already verified!", "info");
+        return;
+      }
+
+      // Implement client-side cooldown
+      const lastSent = localStorage.getItem('lastEmailVerifySendTime');
+      const now = Date.now();
+      if (lastSent && (now - parseInt(lastSent) < EMAIL_VERIFY_COOLDOWN_SECONDS * 1000)) {
+        const timeLeft = Math.ceil((EMAIL_VERIFY_COOLDOWN_SECONDS * 1000 - (now - parseInt(lastSent))) / 1000);
+        showMessage(`Please wait ${timeLeft} seconds before resending.`, 'warning');
+        return;
+      }
+
+      try {
+        await currentUser.sendEmailVerification();
+        showMessage('Verification email sent! Please check your inbox!', 'success');
+        localStorage.setItem('lastEmailVerifySendTime', now.toString());
+        startEmailVerifyCooldownTimer(); // Start the visual cooldown
+      }
+      catch (error) {
+        console.error("Email Verification Error:", error.message);
+        showMessage(`Failed to send verification email: ${error.message}`, 'error');
+      }
+    });
+
+    // Function to start/update email verification cooldown timer
+    function startEmailVerifyCooldownTimer() {
+      clearInterval(emailVerifyCooldownTimer); // Clear any existing timer
+      const lastSent = localStorage.getItem('lastEmailVerifySendTime');
+      const now = Date.now();
+      let timeLeft = EMAIL_VERIFY_COOLDOWN_SECONDS * 1000 - (now - parseInt(lastSent || 0));
+
+      if (timeLeft <= 0) {
+        sendVerifyEmailButton.disabled = false;
+        sendVerifyEmailButton.textContent = "Resend Verification Email";
+        return;
+      }
+
+      sendVerifyEmailButton.disabled = true;
+      emailVerifyCooldownTimer = setInterval(() => {
+        timeLeft -= 1000;
+        if (timeLeft <= 0) {
+          clearInterval(emailVerifyCooldownTimer);
+          sendVerifyEmailButton.disabled = false;
+          sendVerifyEmailButton.textContent = "Resend Verification Email";
+          localStorage.removeItem('lastEmailVerifySendTime');
+        } else {
+          const seconds = Math.ceil(timeLeft / 1000);
+          sendVerifyEmailButton.textContent = `Resend in ${seconds}s`;
+        }
+      }, 1000);
+    }
+
+
+    // Auth state change listener
+    auth.onAuthStateChanged(async user => {
+      currentUser = user;
+      if (user) {
+        // User is signed in.
+        loginNavItem.style.display = 'none';
+        logoutNavItem.style.display = 'list-item';
+        authStatusNavItem.style.display = 'list-item';
+        myProfileNavItem.style.display = 'list-item';
+        myProfileHomeCard.style.display = 'flex';
+
+        // Fetch user profile and currency data
+        await fetchUserProfile(user.uid);
+
+        // Check for admin status
+        isAdmin = (user.email === ADMIN_EMAIL);
+        adminNavItem.style.display = isAdmin ? 'list-item' : 'none';
+        // adminHomeCard.style.display = isAdmin ? 'flex' : 'none'; // Removed from home page as requested
+
+        // Check email verification status
+        if (!user.emailVerified) {
+          emailVerifyBanner.classList.add('active');
+          startEmailVerifyCooldownTimer(); // Start cooldown timer on load if not verified
+          // Always redirect to auth-section if not verified, regardless of current section
+          displaySection('auth-section');
+        } else {
+          emailVerifyBanner.classList.remove('active');
+          clearInterval(emailVerifyCooldownTimer); // Clear timer if already verified
+          updateDailyClaimUI();
+          updateSpinUI(); // Update spin wheel UI
+          fetchChangelogs();
+          fetchBulletins();
+          fetchBlogs();
+          fetchShopItems();
+          setupNotificationListener(); // Start listening for notifications
+
+          // Only navigate to home if currently on auth-section or no section is active
+          const currentActiveSection = document.querySelector('section.active');
+          if (!currentActiveSection || currentActiveSection.id === 'auth-section') {
+            displaySection('home-section');
+          }
+        }
+      } else {
+        // User is signed out.
+        loginNavItem.style.display = 'list-item';
+        logoutNavItem.style.display = 'none';
+        authStatusNavItem.style.display = 'none';
+        myProfileNavItem.style.display = 'none';
+        myProfileHomeCard.style.display = 'none';
+        adminNavItem.style.display = 'none';
+        // adminHomeCard.style.display = 'none'; // Removed from home page as requested
+        isAdmin = false;
+        emailVerifyBanner.classList.remove('active');
+        clearInterval(emailVerifyCooldownTimer); // Clear timer on logout
+
+        // Clear display name in nav
+        authStatusText.textContent = '';
+        currentRealmCoin.textContent = '0'; // Reset nav bar coins
+
+        displaySection('auth-section'); // Redirect to auth section
+        fetchChangelogs(); // Public content can still be fetched
+        fetchBulletins(); // Public content can still be fetched
+        fetchBlogs(); // Public content can still be fetched
+        fetchShopItems(); // Public content can still be fetched
+        if (unsubscribeNotifications) { // Stop listening to notifications
+          unsubscribeNotifications();
+          unsubscribeNotifications = null;
+          notificationCount.classList.remove('active');
+          notificationCount.textContent = '0';
+          notificationsDropdown.classList.remove('active');
+        }
+      }
+    });
+
+
+    // --- User Profile Management ---
+
+    /**
+     * Fetches user profile data and currency, then updates the UI.
+     * @param {string} uid - The user's UID.
+     */
+    async function fetchUserProfile(uid) {
+      if (!uid) {
+        // If no user is logged in, reset profile UI
+        updateProfileUI({}, {});
+        return;
+      }
+
+      const profileRef = db.collection('artifacts').doc(appId).collection('users').doc(uid).collection('profile').doc('data');
+      const currencyRef = db.collection('artifacts').doc(appId).collection('users').doc(uid).collection('currency').doc('data');
+
+      try {
+        const [profileDoc, currencyDoc] = await Promise.all([
+          profileRef.get(),
+          currencyRef.get()
+        ]);
+
+        const profileData = profileDoc.exists ? profileDoc.data() : {};
+        const currencyData = currencyDoc.exists ? currencyDoc.data() : {};
+
+        // Update global currentUser object with profile data for easy access
+        if (currentUser) {
+          currentUser.displayName = profileData.displayName || currentUser.email.substring(0, 5);
+          currentUser.photoURL = profileData.profilePictureUrl || DEFAULT_PFP;
+          currentUser.realmCoins = currencyData.realmCoins || 0;
+          currentUser.lastSpinTime = currencyData.lastSpinTime || null;
+        }
+
+        updateProfileUI(profileData, currencyData);
+        // Update header Realm Coin display
+        currentRealmCoin.textContent = (currencyData.realmCoins || 0).toLocaleString();
+        // Update nav status text with full display name
+        authStatusText.textContent = `Logged in as: ${profileData.displayName || currentUser.email.substring(0, 5)}`;
+
+      }
+      catch (error) {
+        console.error("Error fetching user profile or currency:", error.message);
+        showMessage("Failed to load profile data.", "error");
+        // Fallback for header display if profile fetch fails
+        if (currentUser) {
+          currentRealmCoin.textContent = '0';
+          authStatusText.textContent = `Logged in as: ${currentUser.email.substring(0, 5)}`;
+        }
+      }
+    }
+
+    /**
+     * Updates the My Profile section UI with fetched data.
+     * @param {object} profileData - User's profile data.
+     * @param {object} currencyData - User's currency data.
+     */
+    function updateProfileUI(profileData, currencyData) {
+      profileAvatar.src = profileData.profilePictureUrl || DEFAULT_PFP;
+      profileDisplayName.textContent = profileData.displayName || (currentUser ? currentUser.email.substring(0, 5) : 'Guest');
+      profileEmail.textContent = currentUser ? currentUser.email : 'N/A';
+      profileCoins.textContent = (currencyData.realmCoins || 0).toLocaleString();
+
+      // Populate edit form
+      updateDisplayNameInput.value = profileData.displayName || (currentUser ? currentUser.email.substring(0, 5) : '');
+      updateProfilePicInput.value = profileData.profilePictureUrl || '';
+    }
+
+    // Event listener for updating profile
+    updateProfileForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!currentUser) {
+        showMessage("Please login to update your profile.", "error");
+        return;
+      }
+      if (!currentUser.emailVerified) {
+        showMessage("Please verify your email to update your profile.", "warning");
+        return;
+      }
+
+      const newDisplayName = updateDisplayNameInput.value.trim();
+      const newProfilePicUrl = updateProfilePicInput.value.trim();
+
+      if (newDisplayName === '' || newDisplayName.length > 50) {
+        showMessage('Display Name is required and must be 50 characters or less.', 'error');
+        return;
+      }
+
+      const profileRef = db.collection('artifacts').doc(appId).collection('users').doc(currentUser.uid).collection('profile').doc('data');
+      const publicProfileRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('userPublicProfiles').doc(currentUser.uid);
+
+
+      try {
+        await profileRef.set({
+          displayName: newDisplayName,
+          profilePictureUrl: newProfilePicUrl || DEFAULT_PFP // Store default if empty
+        }, {
+          merge: true
+        }); // Use merge to update existing fields without overwriting others
+
+        // Also update the Firebase Auth profile for consistency (though not directly used for display here)
+        await currentUser.updateProfile({
+          displayName: newDisplayName,
+          photoURL: newProfilePicUrl || DEFAULT_PFP
+        });
+
+        // Update public profile for search/chat
+        await publicProfileRef.set({
+          displayName: newDisplayName,
+          uid: currentUser.uid,
+          email: currentUser.email, // Store full email for search
+          emailPrefix: currentUser.email.substring(0, 5)
+        }, {
+          merge: true
+        });
+
+
+        showMessage('Profile updated successfully!', 'success');
+        fetchUserProfile(currentUser.uid); // Refresh UI
+        fetchBlogs(); // Refresh blogs to show new author name/pfp
+      }
+      catch (error) {
+        console.error("Error updating profile:", error.message);
+        showMessage(`Failed to update profile: ${error.message}`, 'error');
+      }
+    });
+
+
+    // --- Content Management (Admin Functions) ---
+
+    // Add Changelog
+    addChangelogForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!isAdmin) {
+        showMessage("Permission denied.", "error");
+        return;
+      }
+
+      const title = changelogTitleInput.value.trim();
+      const content = changelogContentInput.value.trim();
+
+      // Input validation
+      if (title === '' || title.length > 100) {
+        showMessage('Changelog Title is required and must be 100 characters or less.', 'error');
+        return;
+      }
+      if (content === '' || content.length > 1000) {
+        showMessage('Changelog Content is required and must be 1000 characters or less.', 'error');
+        return;
+      }
+
+      try {
+        await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('changelogs').add({
+          title: title,
+          content: content,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          authorEmail: currentUser ? currentUser.email : 'Admin'
+        });
+        showMessage('Changelog added successfully!', 'success');
+        addChangelogForm.reset();
+        fetchChangelogs();
+      }
+      catch (error) {
+        console.error("Add Changelog Error:", error.message);
+        showMessage(`Failed to add changelog: ${error.message}`, 'error');
+      }
+    });
+
+    // Fetch Changelogs
+    async function fetchChangelogs() {
+      try {
+        const snapshot = await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('changelogs').orderBy('timestamp', 'desc').get();
+        renderChangelogs(snapshot.docs);
+      }
+      catch (error) {
+        console.error("Error fetching changelogs:", error.message);
+      }
+    }
+
+    // Render Changelogs
+    function renderChangelogs(docs) {
+      changelogsContainer.innerHTML = ''; // Clear existing
+      if (docs.length === 0) {
+        changelogsContainer.innerHTML = '<p>No changelogs yet.</p>';
+        return;
+      }
+      docs.forEach(doc => {
+        const changelog = doc.data();
+        const changelogItem = document.createElement('div');
+        changelogItem.classList.add('post-item');
+        const postDate = changelog.timestamp ? new Date(changelog.timestamp.toDate()).toLocaleString() : 'Unknown Date';
+
+        changelogItem.innerHTML = `
+          <h3>${changelog.title}</h3>
+          <p class="blog-meta">Posted by ${changelog.authorEmail ? changelog.authorEmail.substring(0, 5) : 'Anonymous'} on ${postDate}</p>
+          <p>${changelog.content}</p>
+          ${isAdmin ? `<button class="delete-button danger-button" data-id="${doc.id}" data-type="changelog">Delete</button>` : ''}
+        `;
+        changelogsContainer.appendChild(changelogItem);
+      });
+
+      if (isAdmin) {
+        changelogsContainer.querySelectorAll('.delete-button').forEach(button => {
+          button.addEventListener('click', (e) => {
+            const docId = e.target.dataset.id;
+            deleteContent('changelog', docId);
+          });
+        });
+      }
+    }
+
+    // Add Bulletin
+    addBulletinForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!isAdmin) {
+        showMessage("Permission denied.", "error");
+        return;
+      }
+
+      const title = bulletinTitleInput.value.trim();
+      const content = bulletinContentInput.value.trim();
+
+      // Input validation
+      if (title === '' || title.length > 100) {
+        showMessage('Bulletin Title is required and must be 100 characters or less.', 'error');
+        return;
+      }
+      if (content === '' || content.length > 1000) {
+        showMessage('Bulletin Content is required and must be 1000 characters or less.', 'error');
+        return;
+      }
+
+      try {
+        await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('bulletins').add({
+          title: title,
+          content: content,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          authorEmail: currentUser ? currentUser.email : 'Admin'
+        });
+        showMessage('Bulletin added successfully!', 'success');
+        addBulletinForm.reset();
+        fetchBulletins();
+      }
+      catch (error) {
+        console.error("Add Bulletin Error:", error.message);
+        showMessage(`Failed to add bulletin: ${error.message}`, 'error');
+      }
+    });
+
+    // Fetch Bulletins
+    async function fetchBulletins() {
+      try {
+        const snapshot = await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('bulletins').orderBy('timestamp', 'desc').get();
+        renderBulletins(snapshot.docs);
+      }
+      catch (error) {
+        console.error("Error fetching bulletins:", error.message);
+      }
+    }
+
+    // Render Bulletins
+    function renderBulletins(docs) {
+      bulletinsContainer.innerHTML = ''; // Clear existing
+      if (docs.length === 0) {
+        bulletinsContainer.innerHTML = '<p>No bulletins yet.</p>';
+        return;
+      }
+      docs.forEach(doc => {
+        const bulletin = doc.data();
+        const bulletinItem = document.createElement('div');
+        bulletinItem.classList.add('post-item');
+        const postDate = bulletin.timestamp ? new Date(bulletin.timestamp.toDate()).toLocaleString() : 'Unknown Date';
+
+        bulletinItem.innerHTML = `
+          <h3>${bulletin.title}</h3>
+          <p class="blog-meta">Posted by ${bulletin.authorEmail ? bulletin.authorEmail.substring(0, 5) : 'Anonymous'} on ${postDate}</p>
+          <p>${bulletin.content}</p>
+          ${isAdmin ? `<button class="delete-button danger-button" data-id="${doc.id}" data-type="bulletin">Delete</button>` : ''}
+        `;
+        bulletinsContainer.appendChild(bulletinItem);
+      });
+
+      if (isAdmin) {
+        bulletinsContainer.querySelectorAll('.delete-button').forEach(button => {
+          button.addEventListener('click', (e) => {
+            const docId = e.target.dataset.id;
+            deleteContent('bulletin', docId);
+          });
+        });
+      }
+    }
+
+    // Generic Delete Content Function
+    async function deleteContent(type, docId) {
+      // For blogs, allow author to delete their own. For others, only admin.
+      let canDelete = isAdmin;
+      if (type === 'blog' && currentUser) {
+        const blogDoc = await db.collection(`artifacts/${appId}/public/data/blogs`).doc(docId).get();
+        if (blogDoc.exists && blogDoc.data().authorUid === currentUser.uid) {
+          canDelete = true;
+        }
+      }
+
+      if (!canDelete) {
+        showMessage("Permission denied.", "error");
+        return;
+      }
+
+      // Custom confirmation dialog
+      const confirmDelete = await new Promise(resolve => {
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0,0,0,0.7);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 9999;
+        `;
+        const modalContent = document.createElement('div');
+        modalContent.style.cssText = `
+          background-color: var(--card-bg);
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 0 15px rgba(0,204,255,0.5);
+          text-align: center;
+          color: var(--text);
+        `;
+        modalContent.innerHTML = `
+          <p style="margin-bottom: 20px;">Are you sure you want to delete this ${type}?</p>
+          <button id="confirmDeleteBtn" style="background-color: var(--decline-color); color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px;">Yes, Delete</button>
+          <button id="cancelDeleteBtn" style="background-color: var(--primary); color: black; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Cancel</button>
+        `;
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+
+        document.getElementById('confirmDeleteBtn').onclick = () => {
+          document.body.removeChild(modal);
+          resolve(true);
+        };
+        document.getElementById('cancelDeleteBtn').onclick = () => {
+          document.body.removeChild(modal);
+          resolve(false);
+        };
+      });
+
+      if (!confirmDelete) {
+        showMessage(`${type.charAt(0).toUpperCase() + type.slice(1)} deletion cancelled.`, 'info');
+        return;
+      }
+
+      try {
+        const collectionPath = `artifacts/${appId}/public/data/${type}s`; // e.g., 'bulletins', 'changelogs'
+        await db.collection(collectionPath).doc(docId).delete();
+        showMessage(`${type.charAt(0).toUpperCase() + type.slice(1)} deleted successfully!`, 'success');
+        if (type === 'changelog') fetchChangelogs();
+        else if (type === 'bulletin') fetchBulletins();
+        else if (type === 'blog') fetchBlogs();
+        else if (type === 'shopItem') fetchShopItems();
+      }
+      catch (error) {
+        console.error(`Error deleting ${type}:`, error.message);
+        showMessage(`Failed to delete ${type}: ${error.message}`, 'error');
+      }
+    }
+
+
+    // --- Blog Management ---
+    let allBlogs = [];
+    const blogsPerPage = 10;
+    let currentBlogPage = 1;
+    let totalBlogPages = 1;
+
+    // Add Blog Post
+    addBlogForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!currentUser) {
+        showMessage("Please login to create a blog post.", "error");
+        return;
+      }
+      if (!currentUser.emailVerified) {
+        showMessage("Please verify your email to create blog posts.", "warning");
+        return;
+      }
+
+      const blogTitle = blogTitleInput.value.trim();
+      const blogContent = censorText(blogContentInput.value.trim()); // Apply censor
+
+      // Input validation
+      if (blogTitle === '' || blogTitle.length > 100) {
+        showMessage('Blog Title is required and must be 100 characters or less.', 'error');
+        return;
+      }
+      if (blogContent === '' || blogContent.length > 2000) {
+        showMessage('Blog Content is required and must be 2000 characters or less.', 'error');
+        return;
+      }
+
+
+      try {
+        // Fetch current user's profile data for blog post
+        const profileRef = db.collection('artifacts').doc(appId).collection('users').doc(currentUser.uid).collection('profile').doc('data');
+        const profileDoc = await profileRef.get();
+        const profileData = profileDoc.exists ? profileDoc.data() : {};
+
+        const authorDisplayName = profileData.displayName || currentUser.email.substring(0, 5);
+        const authorPfpUrl = profileData.profilePictureUrl || DEFAULT_PFP;
+
+
+        await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('blogs').add({
+          title: blogTitle,
+          content: blogContent,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          authorUid: currentUser.uid,
+          authorEmail: currentUser.email,
+          authorDisplayName: authorDisplayName, // Use actual display name
+          authorPfpUrl: authorPfpUrl // Use actual PFP URL
+        });
+        showMessage('Blog post published successfully!', 'success');
+        addBlogForm.reset();
+        currentBlogPage = 1; // Reset to first page after adding new blog
+        fetchBlogs();
+      }
+      catch (error) {
+        console.error("Add Blog Error:", error.message);
+        showMessage(`Failed to publish blog post: ${error.message}`, 'error');
+      }
+    });
+
+    // Fetch Blogs
+    async function fetchBlogs() {
+      try {
+        const snapshot = await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('blogs').orderBy('timestamp', 'desc').get();
+        allBlogs = snapshot.docs; // Store all docs for pagination
+        totalBlogPages = Math.ceil(allBlogs.length / blogsPerPage);
+
+        renderBlogs(); // Render current page of blogs
+        updateBlogPaginationUI(); // Update pagination controls
+
+        // Show/hide add blog form based on user login/verification status
+        if (currentUser && currentUser.emailVerified) {
+          addBlogContainer.style.display = 'block';
+        } else {
+          addBlogContainer.style.display = 'none';
+        }
+      }
+      catch (error) {
+        console.error("Error fetching blogs:", error.message);
+      }
+    }
+
+    // Render Blogs for the current page
+    function renderBlogs() {
+      blogsContainer.innerHTML = ''; // Clear existing
+      const startIndex = (currentBlogPage - 1) * blogsPerPage;
+      const endIndex = startIndex + blogsPerPage;
+      const blogsToDisplay = allBlogs.slice(startIndex, endIndex);
+
+      if (blogsToDisplay.length === 0) {
+        blogsContainer.innerHTML = '<p>No blog posts yet.</p>';
+        return;
+      }
+      blogsToDisplay.forEach(doc => {
+        const blog = doc.data();
+        const blogItem = document.createElement('div');
+        blogItem.classList.add('post-item');
+        const postDate = blog.timestamp ? new Date(blog.timestamp.toDate()).toLocaleString() : 'Unknown Date';
+
+        const isAuthor = currentUser && blog.authorUid === currentUser.uid;
+        const canDelete = isAdmin || isAuthor;
+
+        // Use stored display name and PFP from blog document
+        const displayAuthorName = blog.authorDisplayName || (blog.authorEmail ? blog.authorEmail.substring(0, 5) : 'Anonymous');
+        const displayAuthorPfp = blog.authorPfpUrl || DEFAULT_PFP;
+
+
+        blogItem.innerHTML = `
+          <p class="blog-meta">
+            <img src="${displayAuthorPfp}" alt="Author PFP" class="pfp-small">
+            Posted by <span class="author-name">${displayAuthorName}</span> on ${postDate}
+          </p>
+          <h3>${blog.title}</h3>
+          <p>${censorText(blog.content)}</p>
+          ${canDelete ? `<button class="delete-button danger-button" data-id="${doc.id}" data-type="blog">Delete</button>` : ''}
+        `;
+        blogsContainer.appendChild(blogItem);
+      });
+
+      blogsContainer.querySelectorAll('.delete-button').forEach(button => {
+        button.addEventListener('click', (e) => {
+          const docId = e.target.dataset.id;
+          deleteContent('blog', docId); // Use generic deleteContent for blogs
+        });
+      });
+    }
+
+    // Update Blog Pagination UI
+    function updateBlogPaginationUI() {
+      if (totalBlogPages > 1) {
+        blogPaginationControls.style.display = 'flex';
+        blogPageInfoSpan.textContent = `Page ${currentBlogPage} of ${totalBlogPages}`;
+        prevBlogPageButton.disabled = (currentBlogPage === 1);
+        nextBlogPageButton.disabled = (currentBlogPage === totalBlogPages);
+      } else {
+        blogPaginationControls.style.display = 'none';
+      }
+    }
+
+    // Pagination button event listeners
+    prevBlogPageButton.addEventListener('click', () => {
+      if (currentBlogPage > 1) {
+        currentBlogPage--;
+        renderBlogs();
+        updateBlogPaginationUI();
+      }
+    });
+
+    nextBlogPageButton.addEventListener('click', () => {
+      if (currentBlogPage < totalBlogPages) {
+        currentBlogPage++;
+        renderBlogs();
+        updateBlogPaginationUI();
+      }
+    });
+
+
+    // --- Daily Realm Coin ---
+
+    // Claim Daily Realm Coin (Uses Firestore Transaction for atomicity)
+    dailyClaimButton.addEventListener('click', async () => {
+      if (!currentUser) {
+        showMessage("Please login to claim daily Realm Coins.", "error");
+        return;
+      }
+      if (!currentUser.emailVerified) {
+        showMessage("Please verify your email to claim daily Realm Coins.", "warning");
+        return;
+      }
+
+      const userId = currentUser.uid;
+      const userCurrencyRef = db.collection('artifacts').doc(appId).collection('users').doc(userId).collection('currency').doc('data');
+      const COIN_REWARD = 5; // Amount of coins per claim
+      const COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+      try {
+        await db.runTransaction(async (transaction) => {
+          const userDoc = await transaction.get(userCurrencyRef);
+
+          if (!userDoc.exists) {
+            // If currency doc doesn't exist, create it with initial values
+            transaction.set(userCurrencyRef, {
+              realmCoins: COIN_REWARD,
+              lastClaimTime: firebase.firestore.FieldValue.serverTimestamp(),
+              lastSpinTime: null, // Initialize last spin time for new doc
+            });
+            showMessage(`Successfully claimed ${COIN_REWARD} Realm Coins!`, 'success');
+            await createNotification(userId, `You claimed your daily ${COIN_REWARD} Realm Coins!`, 'coin_gain'); // NEW: Notification
+            return; // Transaction successful
+          }
+
+          const userData = userDoc.data();
+          const lastClaimTime = userData.lastClaimTime ? userData.lastClaimTime.toDate().getTime() : 0;
+          const currentTime = Date.now();
+
+          if (currentTime - lastClaimTime < COOLDOWN_MS) {
+            const timeLeftMs = COOLDOWN_MS - (currentTime - lastClaimTime);
+            const hours = Math.floor(timeLeftMs / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeftMs % (1000 * 60 * 60)) / (1000 * 60));
+            throw new Error(`You can claim again in ${hours}h ${minutes}m.`);
+          }
+
+          // Update user's coins and last claim time
+          const newRealmCoins = (userData.realmCoins || 0) + COIN_REWARD;
+          transaction.update(userCurrencyRef, {
+            realmCoins: newRealmCoins,
+            lastClaimTime: firebase.firestore.FieldValue.serverTimestamp()
+          });
+
+          showMessage(`Successfully claimed ${COIN_REWARD} Realm Coins!`, 'success');
+          await createNotification(userId, `You claimed your daily ${COIN_REWARD} Realm Coins!`, 'coin_gain'); // NEW: Notification
+        });
+      }
+      catch (error) {
+        console.error("Claim Daily Coin Error:", error.message);
+        showMessage(`Claim failed: ${error.message}`, 'error');
+      } finally {
+        updateDailyClaimUI(); // Always re-check status after attempt
+        fetchUserProfile(currentUser.uid); // Refresh user profile to update coins
+      }
+    });
+
+    let claimTimerInterval = null;
+
+    function updateDailyClaimUI() {
+      if (!currentUser || !currentUser.emailVerified) {
+        dailyClaimStatus.textContent = "Login & Verify Email to Claim.";
+        dailyClaimButton.disabled = true;
+        dailyClaimButton.classList.add('claimed');
+        dailyClaimStatus.classList.remove('claim-ready');
+        clearInterval(claimTimerInterval);
+        currentRealmCoin.textContent = '0'; // Reset nav bar coins
+        return;
+      }
+
+      db.collection('artifacts').doc(appId).collection('users').doc(currentUser.uid).collection('currency').doc('data').get().then(doc => {
+        if (doc.exists) {
+          const userData = doc.data();
+          const lastClaimTime = userData.lastClaimTime ? userData.lastClaimTime.toDate().getTime() : 0;
+          const currentTime = Date.now();
+          const COOLDOWN_MS = 24 * 60 * 60 * 1000;
+
+          currentRealmCoin.textContent = userData.realmCoins ? userData.realmCoins.toLocaleString() : '0';
+
+          if (currentTime - lastClaimTime < COOLDOWN_MS) {
+            dailyClaimButton.disabled = true;
+            dailyClaimButton.classList.add('claimed');
+            dailyClaimStatus.classList.remove('claim-ready');
+            startClaimCooldownTimer(COOLDOWN_MS - (currentTime - lastClaimTime));
+          } else {
+            dailyClaimButton.disabled = false;
+            dailyClaimButton.classList.remove('claimed');
+            dailyClaimStatus.textContent = "Ready to claim!";
+            dailyClaimStatus.classList.add('claim-ready');
+            clearInterval(claimTimerInterval);
+          }
+        } else {
+          // User currency doc not found, assume never claimed
+          dailyClaimButton.disabled = false;
+          dailyClaimButton.classList.remove('claimed');
+          dailyClaimStatus.textContent = "Ready to claim!";
+          dailyClaimStatus.classList.add('claim-ready');
+          clearInterval(claimTimerInterval);
+          currentRealmCoin.textContent = '0'; // Default if no currency doc
+        }
+      }).catch(error => {
+        console.error("Error updating daily claim UI:", error.message);
+        dailyClaimButton.disabled = true; // Disable on error
+      });
+    }
+
+    function startClaimCooldownTimer(initialTimeLeftMs) {
+      clearInterval(claimTimerInterval); // Clear any existing timer
+      let timeLeft = initialTimeLeftMs;
+
+      if (timeLeft <= 0) {
+        updateDailyClaimUI(); // Immediately update if already expired
+        return;
+      }
+
+      claimTimerInterval = setInterval(() => {
+        timeLeft -= 1000; // Decrement by 1 second
+
+        if (timeLeft <= 0) {
+          clearInterval(claimTimerInterval);
+          updateDailyClaimUI(); // Update UI to "Ready to claim!"
+        } else {
+          const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+          const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+          dailyClaimStatus.innerHTML = `You can claim again in: <span class="countdown-display">${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}</span>`;
+        }
+      }, 1000);
+    }
+
+
+    // --- Shop Logic ---
+
+    // Add/Update Shop Item (Admin Only)
+    addShopItemForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!isAdmin) {
+        showMessage("Permission denied. Only admins can add/update shop items.", "error");
+        return;
+      }
+
+      const itemName = shopItemNameInput.value.trim();
+      const itemDescription = shopItemDescriptionInput.value.trim();
+      const itemPrice = parseInt(shopItemPriceInput.value);
+      const itemStock = parseInt(shopItemStockInput.value);
+
+      if (itemName === '' || itemDescription === '' || isNaN(itemPrice) || itemPrice <= 0 || isNaN(itemStock) || itemStock < 0) {
+        showMessage("Please fill in all fields correctly for the shop item.", "warning");
+        return;
+      }
+
+      try {
+        // Check if item already exists by name
+        const existingItemQuery = await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('shopItems').where('name', '==', itemName).limit(1).get();
+
+        if (!existingItemQuery.empty) {
+          // Update existing item
+          const docId = existingItemQuery.docs[0].id;
+          await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('shopItems').doc(docId).update({
+            description: itemDescription,
+            price: itemPrice,
+            stock: itemStock,
+            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          showMessage(`Shop item "${itemName}" updated successfully!`, 'success');
+        } else {
+          // Add new item
+          await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('shopItems').add({
+            name: itemName,
+            description: itemDescription,
+            price: itemPrice,
+            stock: itemStock,
+            imageUrl: `https://placehold.co/100/1a1a1a/e0f7ff?text=${encodeURIComponent(itemName.split(' ')[0])}`, // Placeholder image
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          showMessage(`Shop item "${itemName}" added successfully!`, 'success');
+        }
+        addShopItemForm.reset();
+        fetchShopItems(); // Refresh shop display
+      }
+      catch (error) {
+        console.error("Error adding/updating shop item:", error.message);
+        showMessage(`Failed to add/update shop item: ${error.message}`, 'error');
+      }
+    });
+
+    // Fetch Shop Items
+    function fetchShopItems() {
+      db.collection('artifacts').doc(appId).collection('public').doc('data').collection('shopItems').orderBy('name')
+        .onSnapshot(snapshot => {
+          renderShopItems(snapshot.docs);
+        }, error => {
+          console.error("Error fetching shop items:", error.message);
+        });
+    }
+
+    // Render Shop Items
+    function renderShopItems(docs) {
+      shopItemsContainer.innerHTML = '';
+      if (docs.length === 0) {
+        shopItemsContainer.innerHTML = '<p style="text-align: center; width: 100%; color: var(--text-secondary);">No items in the shop yet. Check back later!</p>';
+        return;
+      }
+
+      docs.forEach(doc => {
+        const item = doc.data();
+        const itemId = doc.id;
+        const shopCard = document.createElement('div');
+        shopCard.classList.add('shop-item-card');
+
+        const isOutOfStock = item.stock <= 0;
+        const canBuy = currentUser && currentUser.emailVerified && currentUser.realmCoins >= item.price && !isOutOfStock;
+
+        shopCard.innerHTML = `
+          <img src="${item.imageUrl}" alt="${item.name}" onerror="this.onerror=null;this.src='https://placehold.co/100/1a1a1a/e0f7ff?text=Item';"/>
+          <h3>${item.name}</h3>
+          <p>${item.description}</p>
+          <div class="price-stock">
+            <span class="price"><i class="fas fa-diamond realm-coin-icon"></i> ${item.price.toLocaleString()}</span>
+            <span class="stock">Stock: ${item.stock}</span>
+          </div>
+          <button class="buy-item-button" data-item-id="${itemId}" ${!canBuy ? 'disabled' : ''}>
+            ${isOutOfStock ? 'Out of Stock' : (canBuy ? 'Buy Now' : 'Requires Login/Coins')}
+          </button>
+          ${isAdmin ? `<button class="delete-button danger-button" data-id="${itemId}" data-type="shopItem" style="position: static; margin-top: 10px;">Delete Item</button>` : ''}
+        `;
+        shopItemsContainer.appendChild(shopCard);
+      });
+
+      shopItemsContainer.querySelectorAll('.buy-item-button').forEach(button => {
+        button.addEventListener('click', (e) => {
+          const itemId = e.target.dataset.itemId;
+          buyShopItem(itemId);
+        });
+      });
+
+      if (isAdmin) {
+        shopItemsContainer.querySelectorAll('.delete-button[data-type="shopItem"]').forEach(button => {
+          button.addEventListener('click', (e) => {
+            const docId = e.target.dataset.id;
+            deleteContent('shopItem', docId);
+          });
+        });
+      }
+    }
+
+    // Buy Shop Item (Uses Firestore Transaction)
+    async function buyShopItem(itemId) {
+      if (!currentUser || !currentUser.emailVerified) {
+        showMessage("Please login and verify your email to buy items.", "error");
+        return;
+      }
+
+      const itemRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('shopItems').doc(itemId);
+      const userCurrencyRef = db.collection('artifacts').doc(appId).collection('users').doc(currentUser.uid).collection('currency').doc('data');
+
+      try {
+        await db.runTransaction(async (transaction) => {
+          const itemDoc = await transaction.get(itemRef);
+          const userCurrencyDoc = await transaction.get(userCurrencyRef);
+
+          if (!itemDoc.exists) {
+            throw new Error("Item not found.");
+          }
+          if (!userCurrencyDoc.exists) {
+            throw new Error("Your currency data not found. Please try logging in again.");
+          }
+
+          const itemData = itemDoc.data();
+          const userData = userCurrencyDoc.data();
+
+          const currentStock = itemData.stock || 0;
+          const itemPrice = itemData.price || 0;
+          const userCoins = userData.realmCoins || 0;
+
+          if (currentStock <= 0) {
+            throw new Error(`"${itemData.name}" is out of stock.`);
+          }
+          if (userCoins < itemPrice) {
+            throw new Error(`Not enough Realm Coins to buy "${itemData.name}". You need ${itemPrice.toLocaleString()} coins.`);
+          }
+
+          // Perform the purchase
+          transaction.update(itemRef, {
+            stock: currentStock - 1
+          });
+          transaction.update(userCurrencyRef, {
+            realmCoins: userCoins - itemPrice
+          });
+
+          showMessage(`Successfully purchased "${itemData.name}" for ${itemPrice.toLocaleString()} Realm Coins!`, 'success');
+          await createNotification(currentUser.uid, `You purchased "${itemData.name}" for ${itemPrice.toLocaleString()} Realm Coins.`, 'coin_loss'); // NEW: Notification
+        });
+      }
+      catch (error) {
+        console.error("Buy Item Error:", error.message);
+        showMessage(`Purchase failed: ${error.message}`, 'error');
+      } finally {
+        fetchShopItems(); // Refresh shop display
+        fetchUserProfile(currentUser.uid); // Refresh user coins in header/profile
+      }
+    }
+
+
+    // --- Canvas Background Logic ---
+    let canvas, ctx, w, h;
+    let particles = [];
+    const particleCount = 100;
+    const maxRadius = 3;
+    const minRadius = 1;
+    const maxSpeed = 0.5;
+
+    function initCanvasBackground() {
+      canvas = document.getElementById("backgroundCanvas");
+      // NEW SAFETY NET: Check if canvas element exists before proceeding
+      if (!canvas) {
+        console.warn("Background canvas element not found. Canvas background will not be rendered.");
+        return;
+      }
+      ctx = canvas.getContext("2d");
+      resizeResetCanvas();
+      createParticles();
+      animateParticles();
+    }
+
+    function resizeResetCanvas() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+      ctx.fillStyle = "#000"; // Ensure clear background
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    class Particle {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.radius = Math.random() * (maxRadius - minRadius) + minRadius;
+        this.color = `rgba(0, ${Math.floor(Math.random() * 100) + 155}, ${Math.floor(Math.random() * 200) + 55}, ${Math.random() * 0.5 + 0.3})`;
+        this.vx = (Math.random() - 0.5) * maxSpeed;
+        this.vy = (Math.random() - 0.5) * maxSpeed;
+      }
+
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+
+        if (this.x - this.radius < 0 || this.x + this.radius > w) {
+          this.vx *= -1;
+        }
+        if (this.y - this.radius < 0 || this.y + this.radius > h) {
+          this.vy *= -1;
+        }
+
+        this.draw();
+      }
+    }
+
+    function createParticles() {
+      for (let i = 0; i < particleCount; i++) {
+        particles.push(new Particle(Math.random() * w, Math.random() * h));
+      }
+    }
+
+    function animateParticles() {
+      requestAnimationFrame(animateParticles);
+      ctx.clearRect(0, 0, w, h); // Clear frame
+      ctx.fillStyle = "rgba(10, 10, 10, 0.5)"; // Semi-transparent overlay to create trails
+      ctx.fillRect(0, 0, w, h);
+
+      for (let i = 0; i < particles.length; i++) {
+        particles[i].update();
+      }
+    }
+
+    // --- Games Section (Spin The Wheel) Logic ---
+
+    function initWheel() {
+      if (!wheelCanvas) {
+        console.error("Wheel canvas not found.");
+        return;
+      }
+      wheelCtx = wheelCanvas.getContext('2d');
+      // Set canvas dimensions to be responsive while maintaining aspect ratio
+      const containerWidth = wheelCanvas.parentElement.offsetWidth;
+      const size = Math.min(containerWidth * 0.8, 400); // Max 400px, but responsive
+      wheelCanvas.width = size;
+      wheelCanvas.height = size;
+
+      drawWheel();
+    }
+
+    function drawWheel() {
+      const centerX = wheelCanvas.width / 2;
+      const centerY = wheelCanvas.height / 2;
+      const radius = Math.min(centerX, centerY) * 0.9; // Leave more padding for outer glow
+
+      wheelCtx.clearRect(0, 0, wheelCanvas.width, wheelCanvas.height);
+
+      segments.forEach((segment, i) => {
+        const startAngle = (i * segmentAngle) * Math.PI / 180;
+        const endAngle = ((i + 1) * segmentAngle) * Math.PI / 180;
+
+        wheelCtx.beginPath();
+        wheelCtx.moveTo(centerX, centerY);
+        wheelCtx.arc(centerX, centerY, radius, startAngle, endAngle);
+        wheelCtx.closePath();
+        wheelCtx.fillStyle = segment.color;
+        wheelCtx.fill();
+        wheelCtx.strokeStyle = var_to_hex('--primary'); // Use primary color for segment borders
+        wheelCtx.lineWidth = 3; // Thicker borders
+        wheelCtx.stroke();
+
+        // Draw text
+        wheelCtx.save();
+        wheelCtx.translate(centerX, centerY);
+        wheelCtx.rotate((startAngle + endAngle) / 2);
+        wheelCtx.textAlign = 'right';
+        wheelCtx.fillStyle = var_to_hex('--background'); // Dark text for contrast
+        wheelCtx.font = 'bold 18px Arial'; // Larger font for text
+        wheelCtx.fillText(segment.text, radius * 0.85, 5); // Adjust text position
+        wheelCtx.restore();
+      });
+
+      // Draw center circle (now a glow effect)
+      wheelCtx.beginPath();
+      wheelCtx.arc(centerX, centerY, radius * 0.2, 0, Math.PI * 2); // Smaller center circle
+      wheelCtx.fillStyle = var_to_hex('--primary');
+      wheelCtx.fill();
+      wheelCtx.strokeStyle = var_to_hex('--primary-dark');
+      wheelCtx.lineWidth = 5; // Thicker border for center
+      wheelCtx.stroke();
+      // Add a glow to the center
+      wheelCtx.shadowBlur = 20;
+      wheelCtx.shadowColor = var_to_hex('--primary');
+      wheelCtx.fill(); // Re-fill to apply shadow
+      wheelCtx.shadowBlur = 0; // Reset shadow
+    }
+
+    // Helper to convert CSS variable to hex for canvas fillStyle
+    function var_to_hex(variable) {
+      const style = getComputedStyle(document.documentElement);
+      const color = style.getPropertyValue(variable).trim();
+      if (color.startsWith('#')) return color;
+      // Basic rgba to hex conversion for simplicity, might not be perfect for all cases
+      const rgbaMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d*\.?\d+))?\)/);
+      if (rgbaMatch) {
+        const toHex = c => ('0' + parseInt(c).toString(16)).slice(-2);
+        return `#${toHex(rgbaMatch[1])}${toHex(rgbaMatch[2])}${toHex(rgbaMatch[3])}`;
+      }
+      return '#000000'; // Fallback
+    }
+
+    // Spin the wheel logic
+    spinButton.addEventListener('click', () => spinWheel('free'));
+    buySpinButton.addEventListener('click', () => spinWheel('paid'));
+
+    async function spinWheel(type) {
+      console.log(`Attempting spin: type=${type}`);
+      console.log(`Current User: ${currentUser ? currentUser.uid : 'None'}, Email Verified: ${currentUser ? currentUser.emailVerified : 'N/A'}`);
+      console.log(`Wheel Spinning: ${wheelSpinning}`);
+
+      if (wheelSpinning || !currentUser || !currentUser.emailVerified) {
+        showMessage("Please login and verify your email, or wait for the current spin to finish.", "warning");
+        return;
+      }
+
+      const userId = currentUser.uid;
+      const userCurrencyRef = db.collection('artifacts').doc(appId).collection('users').doc(userId).collection('currency').doc('data');
+      const COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
+      const SPIN_COST = 5;
+
+      try {
+        // Temporarily disable buttons immediately to prevent double clicks
+        wheelSpinning = true;
+        spinButton.disabled = true;
+        buySpinButton.disabled = true;
+
+        let reward = 0; // Initialize reward outside transaction
+
+        await db.runTransaction(async (transaction) => {
+          const userDoc = await transaction.get(userCurrencyRef);
+          let currentCoins;
+          let lastSpinTime;
+
+          if (!userDoc.exists) {
+            // If currency doc doesn't exist, create it with initial values
+            console.log("Currency document not found, initializing...");
+            transaction.set(userCurrencyRef, {
+              realmCoins: 0,
+              lastClaimTime: null, // Initialize daily claim time
+              lastSpinTime: null, // Initialize last spin time
+            });
+            currentCoins = 0; // Set initial coins for this transaction
+            lastSpinTime = null; // Set initial last spin time for this transaction
+            showMessage("Your currency data was initialized. Please try spinning again!", "info");
+            throw new Error("Currency data initialized. Please retry spin."); // Throw to abort current transaction and prompt retry
+          } else {
+            currentCoins = userDoc.data().realmCoins;
+            lastSpinTime = userDoc.data().lastSpinTime;
+            console.log(`User coins: ${currentCoins}, Last spin time: ${lastSpinTime ? lastSpinTime.toDate() : 'Never'}`);
+          }
+
+          if (type === 'free') {
+            const currentTime = Date.now();
+            if (currentTime - (lastSpinTime ? lastSpinTime.toDate().getTime() : 0) < COOLDOWN_MS) {
+              const timeLeftMs = COOLDOWN_MS - (currentTime - (lastSpinTime ? lastSpinTime.toDate().getTime() : 0));
+              const hours = Math.floor(timeLeftMs / (1000 * 60 * 60));
+              const minutes = Math.floor((timeLeftMs % (1000 * 60 * 60)) / (1000 * 60));
+              throw new Error(`Free spin available in ${hours}h ${minutes}m.`);
+            }
+            // For free spin, update lastSpinTime now.
+            transaction.update(userCurrencyRef, {
+              lastSpinTime: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            console.log("Free spin conditions met. Updating lastSpinTime.");
+          } else if (type === 'paid') {
+            if (currentCoins < SPIN_COST) {
+              throw new Error(`Not enough Realm Coins to buy a spin. You need ${SPIN_COST} coins.`);
+            }
+            currentCoins -= SPIN_COST;
+            // Paid spin deducts coins and resets the free spin cooldown
+            transaction.update(userCurrencyRef, {
+              realmCoins: currentCoins,
+              lastSpinTime: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            console.log(`Paid spin. Deducted ${SPIN_COST} coins. New balance: ${currentCoins}`);
+            await createNotification(userId, `You spent ${SPIN_COST} Realm Coins on a spin.`, 'coin_loss');
+          }
+
+          // Determine winning segment and reward *within* the transaction
+          const winningSegmentIndex = Math.floor(Math.random() * segments.length);
+          reward = segments[winningSegmentIndex].value; // Store reward for later use
+          console.log(`Winning segment index: ${winningSegmentIndex}, Reward: ${reward}`);
+
+          // Calculate final coins *including* the prize, as part of the transaction
+          const newTotalCoins = currentCoins + reward; // currentCoins already reflects deduction if paid
+          transaction.update(userCurrencyRef, {
+            realmCoins: newTotalCoins
+          });
+          console.log(`New total coins after reward: ${newTotalCoins}`);
+
+          // Set the transform property for the animation (visual part)
+          const targetAngleForSegmentCenter = (winningSegmentIndex * segmentAngle) + (segmentAngle / 2);
+          const randomOffset = (Math.random() * (segmentAngle * 0.8)) - (segmentAngle * 0.4);
+          let finalTargetAngle = (360 - targetAngleForSegmentCenter + 270) % 360;
+          const rotations = Math.floor(Math.random() * 6) + 5; // 5 to 10 rotations
+          finalTargetAngle += (360 * rotations);
+
+          wheelCanvas.style.transition = 'transform 4s cubic-bezier(0.2, 0.8, 0.2, 1)';
+          wheelCanvas.style.transform = `rotate(${finalTargetAngle}deg)`;
+        });
+
+        // After the transaction successfully commits, handle the visual feedback and notifications
+        setTimeout(async () => {
+          // The reward variable holds the value determined in the transaction
+          showMessage(`You won ${reward} Realm Coins!`, 'success');
+          lastSpinResult.textContent = `You won: ${reward} Realm Coins!`;
+          await createNotification(userId, `You won ${reward} Realm Coins from Spin The Wheel!`, 'coin_gain');
+
+          wheelSpinning = false;
+          fetchUserProfile(userId); // Refresh user coins in header/profile
+          updateSpinUI(); // Re-enable buttons based on cooldown/coins
+        }, 4000); // Wait for the 4-second animation to complete
+
+      }
+      catch (error) {
+        console.error("Spin Wheel Error:", error.message);
+        // Only show message if it's not the "Currency data initialized" message
+        if (error.message !== "Currency data initialized. Please retry spin.") {
+          showMessage(`Spin failed: ${error.message}`, 'error');
+        }
+        wheelSpinning = false; // Reset spinning state on error
+        updateSpinUI(); // Re-enable buttons
+      }
+    }
+
+    let spinTimerInterval = null;
+
+    function updateSpinUI() {
+      if (!currentUser || !currentUser.emailVerified) {
+        spinCooldownStatus.textContent = "Login & Verify Email to Play.";
+        spinButton.disabled = true;
+        buySpinButton.disabled = true;
+        spinCooldownStatus.classList.remove('ready');
+        clearInterval(spinTimerInterval);
+        return;
+      }
+
+      db.collection('artifacts').doc(appId).collection('users').doc(currentUser.uid).collection('currency').doc('data').get().then(doc => {
+        if (doc.exists) {
+          const userData = doc.data();
+          const lastSpinTime = userData.lastSpinTime ? userData.lastSpinTime.toDate().getTime() : 0;
+          const currentTime = Date.now();
+          const COOLDOWN_MS = 24 * 60 * 60 * 1000;
+          const userCoins = userData.realmCoins || 0;
+          const SPIN_COST = 5;
+
+          if (currentTime - lastSpinTime < COOLDOWN_MS) {
+            spinButton.disabled = true;
+            spinCooldownStatus.classList.remove('ready');
+            startSpinCooldownTimer(COOLDOWN_MS - (currentTime - lastSpinTime));
+          } else {
+            spinButton.disabled = false;
+            spinCooldownStatus.textContent = "Free spin ready!";
+            spinCooldownStatus.classList.add('ready');
+            clearInterval(spinTimerInterval);
+          }
+
+          buySpinButton.disabled = userCoins < SPIN_COST;
+          buySpinButton.textContent = `Buy Spin (${SPIN_COST} Coins)`;
+
+        } else {
+          // User currency doc not found, assume never spun
+          spinButton.disabled = false;
+          buySpinButton.disabled = true; // Cannot buy without coins
+          spinCooldownStatus.textContent = "Free spin ready!";
+          spinCooldownStatus.classList.add('ready');
+          clearInterval(spinTimerInterval);
+        }
+      }).catch(error => {
+        console.error("Error updating spin UI:", error.message);
+        spinButton.disabled = true; // Disable on error
+        buySpinButton.disabled = true;
+      });
+    }
+
+    function startSpinCooldownTimer(initialTimeLeftMs) {
+      clearInterval(spinTimerInterval);
+      let timeLeft = initialTimeLeftMs;
+
+      if (timeLeft <= 0) {
+        updateSpinUI();
+        return;
+      }
+
+      spinTimerInterval = setInterval(() => {
+        timeLeft -= 1000;
+
+        if (timeLeft <= 0) {
+          clearInterval(spinTimerInterval);
+          updateSpinUI();
+        } else {
+          const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+          const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+          spinCooldownStatus.innerHTML = `Next free spin in: <span class="countdown-display">${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}</span>`;
+        }
+      }, 1000);
+    }
+
+    // --- Notification System Logic ---
+    notificationBell.addEventListener('click', () => {
+      notificationsDropdown.classList.toggle('active');
+      if (notificationsDropdown.classList.contains('active')) {
+        markAllNotificationsAsRead();
+      }
+    });
+
+    // Close dropdown if clicked outside
+    document.addEventListener('click', (event) => {
+      if (!notificationBell.contains(event.target) && !notificationsDropdown.contains(event.target)) {
+        notificationsDropdown.classList.remove('active');
+      }
+    });
+
+    function setupNotificationListener() {
+      if (!currentUser || !currentUser.emailVerified) {
+        if (unsubscribeNotifications) {
+          unsubscribeNotifications();
+          unsubscribeNotifications = null;
+        }
+        notificationCount.classList.remove('active');
+        notificationCount.textContent = '0';
+        notificationsList.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Login to see notifications.</p>';
+        return;
+      }
+
+      const notificationsRef = db.collection('artifacts').doc(appId).collection('users').doc(currentUser.uid).collection('notifications');
+
+      if (unsubscribeNotifications) {
+        unsubscribeNotifications(); // Unsubscribe from previous listener if exists
+      }
+
+      unsubscribeNotifications = notificationsRef.orderBy('timestamp', 'desc')
+        .onSnapshot(snapshot => {
+          renderNotifications(snapshot.docs);
+        }, error => {
+          console.error("Error fetching notifications:", error.message);
+          notificationsList.innerHTML = '<p style="text-align: center; color: var(--error);">Failed to load notifications.</p>';
+        });
+    }
+
+    function renderNotifications(docs) {
+      notificationsList.innerHTML = '';
+      let unreadCount = 0;
+
+      if (docs.length === 0) {
+        notificationsList.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No new notifications.</p>';
+      } else {
+        docs.forEach(doc => {
+          const notification = doc.data();
+          const notificationId = doc.id;
+          const isUnread = !notification.read;
+
+          if (isUnread) {
+            unreadCount++;
+          }
+
+          const notificationItem = document.createElement('div');
+          notificationItem.classList.add('notification-item');
+          if (isUnread) {
+            notificationItem.classList.add('unread');
+          }
+
+          const timestamp = notification.timestamp ? new Date(notification.timestamp.toDate()).toLocaleString() : 'Unknown Time';
+
+          notificationItem.innerHTML = `
+            <span>${notification.message}</span>
+            <span class="timestamp">${timestamp}</span>
+            ${isUnread ? `<button class="mark-read-button" data-id="${notificationId}">&times;</button>` : ''}
+          `;
+          notificationsList.appendChild(notificationItem);
+        });
+
+        notificationsList.querySelectorAll('.mark-read-button').forEach(button => {
+          button.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent dropdown from closing if clicked
+            const notificationId = e.target.dataset.id;
+            markNotificationAsRead(notificationId);
+          });
+        });
+      }
+
+      // Update bell icon
+      if (unreadCount > 0) {
+        notificationCount.textContent = unreadCount;
+        notificationCount.classList.add('active');
+        notificationBell.classList.add('has-unread');
+      } else {
+        notificationCount.classList.remove('active');
+        notificationCount.textContent = '0';
+        notificationBell.classList.remove('has-unread');
+      }
+    }
+
+    async function markNotificationAsRead(notificationId) {
+      if (!currentUser || !currentUser.emailVerified) return;
+      try {
+        await db.collection('artifacts').doc(appId).collection('users').doc(currentUser.uid).collection('notifications').doc(notificationId).update({
+          read: true
+        });
+      }
+      catch (error) {
+        console.error("Error marking notification as read:", error.message);
+      }
+    }
+
+    async function markAllNotificationsAsRead() {
+      if (!currentUser || !currentUser.emailVerified) return;
+      try {
+        const unreadNotifications = await db.collection('artifacts').doc(appId).collection('users').doc(currentUser.uid).collection('notifications').where('read', '==', false).get();
+        const batch = db.batch();
+        unreadNotifications.docs.forEach(doc => {
+          batch.update(doc.ref, {
+            read: true
+          });
+        });
+        await batch.commit();
+      }
+      catch (error) {
+        console.error("Error marking all notifications as read:", error.message);
+      }
+    }
+
+    // --- Admin Add Realm Coins Logic ---
+    adminAddCoinsForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!isAdmin) {
+        showMessage("Permission denied. Only admins can add coins.", "error");
+        return;
+      }
+
+      const targetIdentifier = adminTargetIdentifierInput.value.trim();
+      const amountToAdd = parseInt(adminCoinAmountInput.value);
+
+      if (targetIdentifier === '' || isNaN(amountToAdd) || amountToAdd <= 0) {
+        showMessage("Please enter a valid user identifier and a positive coin amount.", "warning");
+        return;
+      }
+
+      try {
+        // Try to find user by email first
+        let userDocSnapshot;
+        const userByEmailQuery = await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('userPublicProfiles').where('email', '==', targetIdentifier).limit(1).get();
+
+        if (!userByEmailQuery.empty) {
+          userDocSnapshot = userByEmailQuery.docs[0];
+        } else {
+          // If not found by email, try by display name
+          const userByNameQuery = await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('userPublicProfiles').where('displayName', '==', targetIdentifier).limit(1).get();
+          if (!userByNameQuery.empty) {
+            userDocSnapshot = userByNameQuery.docs[0];
+          }
+        }
+
+        if (!userDocSnapshot) {
+          showMessage(`User "${targetIdentifier}" not found.`, 'error');
+          return;
+        }
+
+        const targetUid = userDocSnapshot.data().uid;
+        const targetDisplayName = userDocSnapshot.data().displayName;
+        const targetCurrencyRef = db.collection('artifacts').doc(appId).collection('users').doc(targetUid).collection('currency').doc('data');
+
+        await db.runTransaction(async (transaction) => {
+          const targetCurrencyDoc = await transaction.get(targetCurrencyRef);
+          const currentCoins = targetCurrencyDoc.exists ? targetCurrencyDoc.data().realmCoins : 0;
+          const newCoins = currentCoins + amountToAdd;
+
+          transaction.set(targetCurrencyRef, {
+            realmCoins: newCoins
+          }, {
+            merge: true
+          });
+        });
+
+        showMessage(`Successfully added ${amountToAdd} Realm Coins to ${targetDisplayName}!`, 'success');
+        createNotification(targetUid, `You received ${amountToAdd} Realm Coins from an Admin!`, 'coin_gain'); // Notify target user
+        adminAddCoinsForm.reset();
+        // If admin added coins to themselves, refresh their profile
+        if (targetUid === currentUser.uid) {
+          fetchUserProfile(currentUser.uid);
+        }
+      }
+      catch (error) {
+        console.error("Error adding coins:", error.message);
+        showMessage(`Failed to add coins: ${error.message}`, 'error');
+      }
+    });
+
+    // --- Trade Calculator Logic ---
+
+    // Function to populate dropdowns with items
+    function populateTradeCalculatorDropdowns() {
+      // Clear existing options first (except the default "Select Item")
+      yourItemSelect.innerHTML = '<option value="">Select Beli Item</option>';
+      theirItemSelect.innerHTML = '<option value="">Select Beli Item</option>';
+      yourTradeItemSelect.innerHTML = '<option value="">Select Trade Item</option>';
+      theirTradeItemSelect.innerHTML = '<option value="">Select Trade Item</option>';
+
+      // Populate Beli items
+      for (const item in beliValues) {
+        const optionBeli = document.createElement('option');
+        optionBeli.value = item;
+        optionBeli.textContent = `${item} (${formatCurrency(beliValues[item])} Beli)`;
+        yourItemSelect.appendChild(optionBeli.cloneNode(true));
+        theirItemSelect.appendChild(optionBeli.cloneNode(true));
+      }
+
+      // Populate Trade items
+      for (const item in tradeValues) {
+        const optionTrade = document.createElement('option');
+        optionTrade.value = item;
+        optionTrade.textContent = `${item} (${formatCurrency(tradeValues[item])} Trade Value)`;
+        yourTradeItemSelect.appendChild(optionTrade.cloneNode(true));
+        theirTradeItemSelect.appendChild(optionTrade.cloneNode(true));
+      }
+    }
+
+    // Helper function to format currency
+    function formatCurrency(value) {
+      if (value >= 1000000000) {
+        return (value / 1000000000).toFixed(1) + 'B';
+      } else if (value >= 1000000) {
+        return (value / 1000000).toFixed(1) + 'M';
+      } else if (value >= 1000) {
+        return (value / 1000).toFixed(1) + 'K';
+      }
+      return value.toLocaleString();
+    }
+
+    // Function to add item to a list
+    function addItem(listArray, selectElement, type, customValueInput = null) {
+      let itemName;
+      let itemValue;
+
+      if (type === 'custom') {
+        itemValue = parseInt(customValueInput.value);
+        if (isNaN(itemValue) || itemValue <= 0) {
+          showMessage("Please enter a valid positive custom Beli value.", "warning");
+          return;
+        }
+        itemName = `${itemValue.toLocaleString()} Beli (Custom)`;
+        customValueInput.value = ''; // Clear custom input
+      } else {
+        itemName = selectElement.value;
+        if (!itemName) {
+          showMessage("Please select an item to add.", "warning");
+          return;
+        }
+        itemValue = (type === 'beli') ? beliValues[itemName] : tradeValues[itemName];
+        selectElement.value = ""; // Reset dropdown
+      }
+
+      listArray.push({
+        name: itemName,
+        type: type,
+        value: itemValue
+      });
+      renderItems(listArray, listArray === yourItems ? yourItemList : theirItemList);
+      calculateTrade();
+    }
+
+    // Function to remove item from a list
+    function removeItem(listArray, index) {
+      listArray.splice(index, 1);
+      renderItems(listArray, listArray === yourItems ? yourItemList : theirItemList);
+      calculateTrade();
+    }
+
+    // Function to render items in the list display
+    function renderItems(listArray, displayElement) {
+      displayElement.innerHTML = '';
+      if (listArray.length === 0) {
+        displayElement.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No items added yet.</p>';
+        return;
+      }
+      listArray.forEach((item, index) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.classList.add('item-list-item');
+        itemDiv.innerHTML = `
+          <span>${item.name} (${formatCurrency(item.value)} ${item.type === 'beli' || item.type === 'custom' ? 'Beli' : 'Trade Value'})</span>
+          <button class="remove-item" data-index="${index}">&times;</button>
+        `;
+        displayElement.appendChild(itemDiv);
+      });
+
+      displayElement.querySelectorAll('.remove-item').forEach(button => {
+        button.addEventListener('click', (e) => {
+          const index = parseInt(e.target.dataset.index);
+          removeItem(listArray, index);
+        });
+      });
+    }
+
+    // Function to calculate trade fairness
+    function calculateTrade() {
+      let yourTotalBeli = 0;
+      let yourTotalTrade = 0;
+      let theirTotalBeli = 0;
+      let theirTotalTrade = 0;
+
+      yourItems.forEach(item => {
+        if (item.type === 'beli' || item.type === 'custom') {
+          yourTotalBeli += item.value;
+        } else if (item.type === 'trade') {
+          yourTotalTrade += item.value;
+        }
+      });
+
+      theirItems.forEach(item => {
+        if (item.type === 'beli' || item.type === 'custom') {
+          theirTotalBeli += item.value;
+        } else if (item.type === 'trade') {
+          theirTotalTrade += item.value;
+        }
+      });
+
+      yourTotalBeliSpan.textContent = formatCurrency(yourTotalBeli);
+      yourTotalTradeSpan.textContent = formatCurrency(yourTotalTrade);
+      theirTotalBeliSpan.textContent = formatCurrency(theirTotalBeli);
+      theirTotalTradeSpan.textContent = formatCurrency(theirTotalTrade);
+
+      const beliDifference = yourTotalBeli - theirTotalBeli;
+      const tradeDifference = yourTotalTrade - theirTotalTrade;
+
+      beliDifferenceSpan.textContent = formatCurrency(beliDifference);
+      tradeDifferenceSpan.textContent = formatCurrency(tradeDifference);
+
+      // Determine trade result
+      tradeResultSpan.classList.remove('fair', 'overpay', 'underpay');
+      if (Math.abs(beliDifference) <= 100000 && Math.abs(tradeDifference) <= 1000000) { // Small tolerance for "fair"
+        tradeResultSpan.textContent = "Fair Trade!";
+        tradeResultSpan.classList.add('fair');
+      } else if (beliDifference > 0 || tradeDifference > 0) {
+        tradeResultSpan.textContent = "You are Overpaying!";
+        tradeResultSpan.classList.add('overpay');
+      } else {
+        tradeResultSpan.textContent = "You are Underpaying!";
+        tradeResultSpan.classList.add('underpay');
+      }
+    }
+
+    // Event Listeners for Trade Calculator
+    addYourBeliItemButton.addEventListener('click', () => addItem(yourItems, yourItemSelect, 'beli'));
+    addYourTradeItemButton.addEventListener('click', () => addItem(yourItems, yourTradeItemSelect, 'trade'));
+    addYourCustomBeliButton.addEventListener('click', () => addItem(yourItems, null, 'custom', yourCustomBeliInput));
+
+    addTheirBeliItemButton.addEventListener('click', () => addItem(theirItems, theirItemSelect, 'beli'));
+    addTheirTradeItemButton.addEventListener('click', () => addItem(theirItems, theirTradeItemSelect, 'trade'));
+    addTheirCustomBeliButton.addEventListener('click', () => addItem(theirItems, null, 'custom', theirCustomBeliInput));
+
+    // Initial render for empty lists
+    renderItems(yourItems, yourItemList);
+    renderItems(theirItems, theirItemList);
+
+
+    // --- Event Listeners and Initial Calls ---
+
+    // Navigation Toggle for mobile (and desktop now)
+    navToggle.addEventListener('click', () => {
+      navMenu.classList.toggle('active');
+      navToggle.classList.toggle('active'); // Toggle hamburger icon to 'X'
+    });
+
+    // Handle navigation clicks
+    navLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        if (link.id === 'logout-button') return; // Handled separately
+        e.preventDefault();
+        const sectionId = link.getAttribute('href').substring(1);
+        displaySection(sectionId);
+      });
+    });
+
+    // Redirect to homepage when Shinigami Realm title is clicked
+    shinigamiRealmLogo.addEventListener('click', () => {
+      displaySection('home-section');
+    });
+
+    // Clear search buttons logic
+    document.querySelectorAll('.clear-search-button').forEach(button => {
+      button.addEventListener('click', (e) => {
+        const targetInputId = e.target.dataset.targetInput;
+        const targetInput = document.getElementById(targetInputId);
+        targetInput.value = '';
+        // Hide the clear button itself
+        e.target.style.display = 'none';
+      });
+    });
+
+    // Logout button
+    logoutButton.addEventListener('click', async () => {
+      try {
+        await auth.signOut();
+        showMessage('Logged out successfully!', 'success');
+        // UI updates handled by onAuthStateChanged
+      }
+      catch (error) {
+        console.error("Logout Error:", error.message);
+        showMessage(`Logout failed: ${error.message}`, 'error');
+      }
+    });
+
+    // Initialize canvas background on window load
+    window.onload = function() {
+      initCanvasBackground();
+      // Initial display based on auth state (handled by onAuthStateChanged)
+      // Call initWheel here to ensure canvas is ready
+      initWheel();
+      // Check email verification cooldown on load to disable button if needed
+      startEmailVerifyCooldownTimer();
+      // Populate trade calculator dropdowns on load
+      populateTradeCalculatorDropdowns();
+      calculateTrade(); // Initial calculation
+    };
+
+    // Handle window resize for canvas
+    window.addEventListener('resize', () => {
+      resizeResetCanvas();
+      initWheel(); // Re-initialize wheel on resize to adjust its size
+    });
+  </script>
+</body>
+
+</html>
