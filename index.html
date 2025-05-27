@@ -2359,7 +2359,7 @@
     // Explicitly set appId for consistent data paths on GitHub Pages
     // This value MUST match the appId extracted from firebaseConfig.appId in your HTML.
     // For your current HTML, this is '67a3f100b1d4c2964b8851'.
-    const appId = firebaseConfig.appId.split(':')[3]; // Extracts the web app ID part
+    const appId = firebaseConfig.appId.split(':')[2]; // Extracts the web app ID part
     console.log('Using hardcoded appId for GitHub Pages:', appId);
 
     // REMINDER: This is your actual admin email!
